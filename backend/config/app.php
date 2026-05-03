@@ -5,8 +5,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/env.php';
 loadEnv(realpath(__DIR__ . '/../../.env'));
 
-function getEnv2(string $key, mixed $default = null): mixed {
-    return $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?: $default;
+if (!function_exists('getEnv2')) {
+    function getEnv2(string $key, mixed $default = null): mixed {
+        return $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?: $default;
+    }
 }
 
 $env = getEnv2('APP_ENV', 'development');
