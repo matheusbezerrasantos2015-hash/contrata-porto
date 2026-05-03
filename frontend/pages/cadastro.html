@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Crie sua conta e comece a se candidatar às vagas locais." />
+  <title>Criar Conta | ContrataPorto</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@11/dist/css/shepherd.css">
+  <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+  <div id="appHeader"></div>
+
+  <main class="app-main auth-container">
+    <div class="auth-card-wrap">
+      <div class="auth-header">
+        <h1>Crie sua conta</h1>
+        <p>Encontre as melhores vagas no ContrataPorto</p>
+      </div>
+
+      <form id="registerForm" class="auth-form">
+        <div id="profileSelector" class="form-group" style="display: flex; gap: var(--space-4); margin-bottom: var(--space-4); padding: var(--space-2); background: var(--slate-50); border-radius: var(--radius-md); justify-content: center;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; color: var(--slate-700);">
+            <input type="radio" name="perfil" value="CANDIDATO" checked> Sou Candidato
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; color: var(--slate-700);">
+            <input type="radio" name="perfil" value="EMPRESA"> Sou Empresa
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label id="nomeLabel" for="nome">Nome completo</label>
+          <input class="input" id="nome" name="nome" type="text" placeholder="Seu nome" required />
+        </div>
+
+        <div id="companyConfig" style="display: none; padding-top: var(--space-1); border-top: 1px solid var(--slate-200); margin-top: var(--space-4); margin-bottom: var(--space-4);">
+          <div class="form-group">
+            <label for="nome_fantasia">Nome Fantasia da Empresa</label>
+            <input class="input company-input" id="nome_fantasia" name="nome_fantasia" type="text" placeholder="Ex: Acme Corp" />
+          </div>
+          <div class="form-group">
+            <label for="razao_social">Razão Social</label>
+            <input class="input company-input" id="razao_social" name="razao_social" type="text" placeholder="Razão Social LTDA" />
+          </div>
+          <div class="form-group">
+            <label for="cnpj">CNPJ (Apenas números)</label>
+            <input class="input company-input" id="cnpj" name="cnpj" type="text" placeholder="00000000000000" maxlength="14" />
+          </div>
+          <div class="form-group">
+            <label for="email_contato">E-mail Comercial de Contato</label>
+            <input class="input company-input" id="email_contato" name="email_contato" type="email" placeholder="contato@empresa.com" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input class="input" id="email" name="email" type="email" placeholder="seu@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input class="input" id="senha" name="senha" type="password" placeholder="Mínimo 8 caracteres" minlength="8" required />
+          <small style="color: var(--slate-400); font-size: 11px; margin-top: 4px; display: block;">Use uma senha segura e fácil de lembrar.</small>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Criar minha conta gratuita</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Já tem uma conta? <a href="./login.html">Fazer login</a></p>
+      </div>
+
+      <p id="message" class="message"></p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/shepherd.js@11/dist/js/shepherd.min.js"></script>
+  <script type="module" src="../js/layout.js"></script>
+  <script type="module" src="../js/register.js"></script>
+  <script type="module" src="../js/tour.js"></script>
+</body>
+</html>

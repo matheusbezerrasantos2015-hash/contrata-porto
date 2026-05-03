@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações da Empresa — ContrataPorto</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .settings-wrapper {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 0 16px 60px;
+    }
+    .settings-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1f3864;
+      margin-bottom: 8px;
+    }
+    .settings-subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    /* Avatar com iniciais */
+    .avatar-block {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .avatar-initials {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FF6B6B, #d63031);
+      color: white;
+      font-size: 26px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: 1px;
+    }
+    .avatar-info p {
+      font-size: 13px;
+      color: #888;
+      margin: 0;
+    }
+    .avatar-info strong {
+      font-size: 15px;
+      color: #333;
+    }
+
+    /* Seções */
+    .settings-section {
+      background: #fff;
+      border: 1px solid #e8eaf0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f3864;
+      margin: 0 0 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f2f5;
+    }
+
+    /* Campos */
+    .field-group {
+      margin-bottom: 16px;
+    }
+    .field-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 6px;
+    }
+    .field-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #dde1ea;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #333;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+      background: #fff;
+    }
+    .field-group input:focus {
+      outline: none;
+      border-color: #FF6B6B;
+    }
+    .field-group input[readonly] {
+      background: #f5f6fa;
+      color: #888;
+      cursor: not-allowed;
+    }
+    .field-hint {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    /* Botões */
+    .btn-save {
+      width: 100%;
+      padding: 12px;
+      background: #1f3864;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-save:hover   { background: #162a4d; }
+    .btn-save:active  { transform: scale(0.98); }
+    .btn-save:disabled{ background: #aaa; cursor: not-allowed; }
+
+    /* Zona de perigo */
+    .danger-zone {
+      border-color: #ffd0d0;
+      background: #fffafa;
+    }
+    .danger-zone .section-title { color: #c00; border-color: #ffd0d0; }
+    .danger-text {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .btn-danger {
+      width: 100%;
+      padding: 12px;
+      background: #fff;
+      color: #c00;
+      border: 2px solid #c00;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: #c00;
+      color: white;
+    }
+    .btn-danger:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Feedback */
+    .feedback {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 10px;
+      display: none;
+    }
+    .feedback.success { background:#e8f5e9; color:#1b5e20; display:block; }
+    .feedback.error   { background:#ffebee; color:#b71c1c; display:block; }
+  </style>
+</head>
+<body>
+  <!-- Header dinâmico -->
+  <div id="appHeader"></div>
+
+  <div class="settings-wrapper">
+    <h1 class="settings-title">Configurações da Empresa</h1>
+    <p class="settings-subtitle">Gerencie as informações comerciais da sua conta</p>
+
+    <!-- Avatar com iniciais -->
+    <div class="avatar-block">
+      <div class="avatar-initials" id="avatar-initials">--</div>
+      <div class="avatar-info">
+        <strong id="display-nome">Carregando...</strong>
+        <p id="display-email">...</p>
+      </div>
+    </div>
+
+    <!-- Seção: Dados da Empresa -->
+    <div class="settings-section">
+      <h2 class="section-title">Dados da Empresa</h2>
+
+      <div class="field-group">
+        <label for="input-nome">Nome da empresa (Fantasia)</label>
+        <input type="text" id="input-nome" placeholder="Nome fantasia da empresa">
+      </div>
+
+      <div class="field-group">
+        <label for="input-email">E-mail de contato</label>
+        <input type="email" id="input-email" readonly>
+        <p class="field-hint">O e-mail não pode ser alterado por aqui.</p>
+      </div>
+
+      <div class="field-group">
+        <label for="input-telefone">Telefone comercial</label>
+        <input type="tel" id="input-telefone" placeholder="(16) 3333-0000">
+      </div>
+
+      <button class="btn-save" id="btn-salvar-perfil">Salvar alterações</button>
+      <div class="feedback" id="feedback-perfil"></div>
+    </div>
+
+    <!-- Seção: Excluir conta -->
+    <div class="settings-section danger-zone">
+      <h2 class="section-title">Zona de Perigo</h2>
+      <p class="danger-text">
+        Ao excluir sua conta, sua empresa, vagas publicadas e dados
+        serão apagados permanentemente.
+        <strong>Esta ação não pode ser desfeita.</strong>
+      </p>
+
+      <div class="field-group">
+        <label for="input-confirmar">
+          Digite <strong>EXCLUIR</strong> para confirmar
+        </label>
+        <input type="text" id="input-confirmar"
+               placeholder="Digite EXCLUIR aqui">
+      </div>
+
+      <button class="btn-danger" id="btn-excluir" disabled>
+        Excluir minha conta
+      </button>
+      <div class="feedback" id="feedback-exclusao"></div>
+    </div>
+  </div>
+
+  <div id="appFooter"></div>
+
+  <script type="module" src="../js/layout.js"></script>
+  <script type="module" src="../js/settings-empresa.js"></script>
+</body>
+</html>

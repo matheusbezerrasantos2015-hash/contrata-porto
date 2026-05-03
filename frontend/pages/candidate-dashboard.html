@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Acompanhe sua timeline de candidaturas e próximos passos." />
+  <title>Minhas Candidaturas | ContrataPorto</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+  <div id="appHeader"></div>
+
+  <main class="app-main">
+    <header class="page-header" style="margin-bottom: var(--space-4);">
+      <h1 style="font-size: var(--font-2xl); font-weight: 800;">Minha Jornada</h1>
+      <p style="color: var(--slate-500);">Acompanhe o status das suas candidaturas em tempo real.</p>
+    </header>
+
+    <div class="dashboard-grid">
+      <section class="dashboard-main">
+        <div class="card">
+          <h2 style="font-size: var(--font-lg); margin-bottom: var(--space-3);">Timeline de Candidaturas</h2>
+          <div id="applicationsList" class="timeline">
+            <!-- Injetado por candidate-dashboard.js -->
+          </div>
+          <nav id="applicationsPagination" class="pagination" style="margin-top: var(--space-3);"></nav>
+        </div>
+      </section>
+
+      <aside class="dashboard-sidebar">
+        <div class="card">
+          <h3 style="font-size: var(--font-md); margin-bottom: var(--space-2);">Ações Rápidas</h3>
+          <div class="sidebar-actions">
+            <a href="./index.html" class="btn btn-secondary btn-block">Explorar mais vagas</a>
+            <a href="./favorites.html" class="btn btn-ghost btn-block">Vagas Salvas</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <p id="feedback" class="message"></p>
+  </main>
+
+  <div id="appFooter"></div>
+  <script type="module" src="../js/layout.js"></script>
+  <script type="module" src="../js/candidate-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+/* Layout Transitions (FOUC Prevention) */
+body.loading {
+  opacity: 0;
+}
+body.loaded {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.header-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-2);
+  height: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+/* Logo responsive swap */
+.logo-mobile {
+  display: none;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+}
+.logo-desktop {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+.brand span {
+  color: var(--brand-500);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nav-list a:not(.btn) {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--slate-600);
+  transition: var(--transition-fast);
+  text-decoration: none;
+}
+
+.nav-list a:not(.btn):hover {
+  color: var(--brand-500);
+}
+
+/* User Profile & Avatar */
+.user-profile-trigger {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 1px solid var(--brand-100);
+  transition: var(--transition-fast);
+}
+
+.user-profile-trigger:hover .avatar {
+  border-color: var(--brand-500);
+  background: #fff;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 250px;
+  background: #fff;
+  border: 1px solid var(--slate-100);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: 8px 0;
+  display: none;
+  z-index: 1050;
+  animation: dropdownIn 0.2s var(--ease-out);
+}
+
+.user-profile-trigger.active .user-dropdown {
+  display: block;
+}
+
+@keyframes dropdownIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.dropdown-header {
+  padding: 12px 20px;
+}
+
+.dropdown-header strong {
+  display: block;
+  font-size: var(--font-sm);
+  color: var(--slate-900);
+  margin-bottom: 2px;
+}
+
+.dropdown-header span {
+  font-size: var(--font-xs);
+  color: var(--slate-500);
+}
+
+.user-dropdown hr {
+  border: 0;
+  border-top: 1px solid var(--slate-50);
+  margin: 4px 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--slate-700);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.dropdown-item:hover {
+  background: var(--slate-50);
+  color: var(--brand-600);
+}
+
+/* Mobile Toggle */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: var(--slate-50);
+  border: 1px solid var(--slate-100);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--slate-900);
+  border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle { display: flex; }
+  .logo-mobile  { display: block; }
+  .logo-desktop { display: none; }
+  .nav-list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    flex-direction: column;
+    padding: var(--space-2);
+    border-bottom: 1px solid var(--slate-100);
+    box-shadow: var(--shadow-xl);
+    gap: var(--space-1);
+  }
+  .nav-list.open { display: flex; }
+  .nav-list .login-nav-btn { margin-top: 8px; }
+}
+
+.app-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-2);
+  min-height: calc(100vh - 200px);
+}

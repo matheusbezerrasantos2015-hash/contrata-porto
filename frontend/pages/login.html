@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Entre na sua conta para gerenciar vagas e candidaturas." />
+  <title>Entrar | ContrataPorto</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+  <div id="appHeader"></div>
+  
+  <main class="app-main auth-container">
+    <div class="auth-card-wrap">
+      <div class="auth-header">
+        <h1>Bem-vindo de volta</h1>
+        <p>Acesse sua conta para continuar</p>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input class="input" id="email" name="email" type="email" placeholder="seu@email.com" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input class="input" id="senha" name="senha" type="password" placeholder="••••••••" required />
+        </div>
+
+        <div class="form-group">
+          <label for="role">Tipo de conta</label>
+          <select class="select" id="role" name="role" required>
+            <option value="candidato">Candidato (Procuro vaga)</option>
+            <option value="empresa">Empresa (Quero contratar)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Entrar na plataforma</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Esqueceu sua senha? <a href="./esqueci-senha.html">Clique aqui</a></p>
+        <p>Não tem uma conta? <a href="./cadastro.html">Cadastrar agora</a></p>
+      </div>
+      
+      <p id="message" class="message"></p>
+    </div>
+  </main>
+
+  <div id="appFooter"></div>
+  <script type="module" src="../js/layout.js"></script>
+  <script type="module" src="../js/login.js"></script>
+</body>
+</html>

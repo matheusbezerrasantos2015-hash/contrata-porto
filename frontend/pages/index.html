@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Encontre vagas locais com filtros inteligentes no ContrataPorto." />
+  <title>Vagas em Porto Ferreira | ContrataPorto</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@11/dist/css/shepherd.css">
+  <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+  <div id="appHeader"></div>
+
+  <main class="app-main">
+    <section class="hero-section">
+      <h1>O emprego que você busca está em <span>Porto Ferreira</span>.</h1>
+      <p>Conectamos os melhores talentos às melhores empresas da região.</p>
+
+      <div class="search-container">
+        <form id="searchForm" class="search-bar-wrap">
+          <input class="input" name="q" id="searchInput" type="text" placeholder="Qual vaga você procura? (Técnico, Cozinheiro, Logística...)" />
+          <button class="btn btn-primary" type="submit">Buscar Vagas</button>
+        </form>
+        <button id="toggleFilters" class="btn btn-ghost mt-1" style="font-size: var(--font-sm); color: var(--brand-600);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle;">
+            <path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 8h6"></path>
+          </svg>
+          Filtros Avançados
+        </button>
+
+        <div id="filterPanel" class="filter-panel">
+          <form id="advancedFiltersForm" class="filter-grid">
+            <div class="filter-group">
+              <label for="filterArea">Área</label>
+              <select name="area" id="filterArea" class="select">
+                <option value="">Todas as áreas</option>
+                <option value="Administrativo">Administrativo</option>
+                <option value="Logística">Logística</option>
+                <option value="Comércio">Comércio</option>
+                <option value="Indústria">Indústria</option>
+                <option value="Serviços">Serviços</option>
+                <option value="Educação">Educação</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Tecnologia">Tecnologia</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filterExperiencia">Experiência</label>
+              <select name="experiencia" id="filterExperiencia" class="select">
+                <option value="">Qualquer nível</option>
+                <option value="SEM_EXPERIENCIA">Sem experiência / Aprendiz</option>
+                <option value="JUNIOR">Júnior</option>
+                <option value="PLENO">Pleno</option>
+                <option value="SENIOR">Sênior</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filterTipo">Tipo de Contrato</label>
+              <select name="tipo" id="filterTipo" class="select">
+                <option value="">Todos os tipos</option>
+                <option value="CLT">CLT</option>
+                <option value="PJ">PJ / MEI</option>
+                <option value="TEMPORARIO">Temporário</option>
+                <option value="ESTAGIO">Estágio</option>
+                <option value="FREELANCE">Freelance</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filterSalario">Salário Mínimo (R$)</label>
+              <input type="number" name="salario_min" id="filterSalario" class="input" placeholder="Ex: 2000" />
+            </div>
+            <div class="filter-actions mt-3" style="grid-column: 1 / -1; display: flex; gap: 12px; justify-content: flex-end;">
+              <button type="button" id="clearFiltersBtn" class="btn btn-ghost">Limpar Filtros</button>
+              <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <div class="feed-controls" style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-4);">
+      <h2 style="font-size: var(--font-lg); font-weight: 700;">Vagas Recentes</h2>
+      <select id="sortSelect" class="select" style="max-width: 180px; padding: 6px 12px; height: auto;">
+        <option value="recentes">Mais recentes</option>
+        <option value="relevantes">Mais relevantes</option>
+      </select>
+    </div>
+
+    <section id="jobsList" class="jobs-grid" aria-live="polite">
+      <!-- Skeletons will be injected here if needed -->
+    </section>
+
+    <div id="pagination"></div>
+  </main>
+
+  <button id="btn-tour" class="tour-trigger-btn" aria-label="Como funciona o ContrataPorto" title="Ver tutorial">
+    <span>🗺️</span>
+    <span class="tour-trigger-label">Como funciona?</span>
+  </button>
+
+  <script src="https://cdn.jsdelivr.net/npm/shepherd.js@11/dist/js/shepherd.min.js"></script>
+  <script type="module" src="../js/layout.js"></script>
+  <script type="module" src="../js/jobs.js"></script>
+  <script type="module" src="../js/tour.js"></script>
+</body>
+</html>

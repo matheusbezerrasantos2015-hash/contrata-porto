@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Encontre vagas locais com filtros inteligentes no ContrataPorto." />
+  <title>Vagas em Porto Ferreira | ContrataPorto</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body>
+  <div id="appHeader"></div>
+
+  <main class="app-main page-grid">
+    <section class="section-card search-shell">
+      <h1 class="hero-title">Encontre sua próxima oportunidade</h1>
+      <p class="hero-subtitle">Busca inteligente com experiência premium de candidatura.</p>
+      <form id="filtersForm" class="filters-grid">
+        <input class="input" name="area" type="text" placeholder="Cargo, habilidade ou área" />
+        <select class="select" name="nivel"><option value="">Nível</option><option value="ESTAGIO">Estágio</option><option value="JUNIOR">Júnior</option><option value="PLENO">Pleno</option><option value="SENIOR">Sênior</option></select>
+        <select class="select" name="tipo"><option value="">Tipo de contrato</option><option value="CLT">CLT</option><option value="PJ">PJ</option><option value="ESTAGIO">Estágio</option><option value="TEMPORARIO">Temporário</option></select>
+        <input class="input" name="cidade" type="text" placeholder="Cidade" value="Porto Ferreira" />
+        <button class="btn btn-primary" type="submit">Buscar vagas</button>
+      </form>
+      <div class="chips">
+        <span class="chip">Remoto</span>
+        <span class="chip">Tecnologia</span>
+        <span class="chip">Marketing</span>
+        <span class="chip">Primeiro emprego</span>
+      </div>
+      <div class="card-actions" style="margin-top:8px;">
+        <label for="sortSelect" class="job-meta">Ordenar por</label>
+        <select id="sortSelect" class="select" style="max-width:220px;">
+          <option value="recentes">Mais recentes</option>
+          <option value="relevantes">Mais relevantes</option>
+        </select>
+      </div>
+      <p id="feedback" class="message"></p>
+    </section>
+
+    <section id="jobsList" class="jobs-grid" aria-live="polite"></section>
+    <nav id="jobsPagination" class="pagination" aria-label="Paginação de vagas"></nav>
+  </main>
+
+  <div id="appFooter"></div>
+  <script type="module" src="../js/layout.js"></script>
+  <script type="module" src="../js/jobs.js"></script>
+</body>
+</html>
