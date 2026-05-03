@@ -1,0 +1,5 @@
+.env
+.env.localhost
+.env.production
+vendor/
+uploads/
