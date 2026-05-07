@@ -12,4 +12,4 @@ COPY . .
 EXPOSE 8080
 
 # Servindo a partir da raiz /app para permitir acesso ao frontend e backend
-CMD php -S 0.0.0.0:$PORT -t /app
+CMD php -S 0.0.0.0:$PORT router.php

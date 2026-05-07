@@ -13,13 +13,13 @@ const isProduction = origin.includes("railway.app");
 let API_BASE, API_URL;
 
 if (isProduction) {
-  API_BASE = `${origin}/backend/public/index.php`;
-  API_URL = `${origin}/backend/public/index.php/api`;
+  API_BASE = origin;
+  API_URL = `${origin}/api`;
 } else {
   const pathParts = window.location.pathname.split("/");
-  const projectRoot = `/${pathParts[1]}`;
-  API_BASE = `${origin}${projectRoot}/backend/public/index.php`;
-  API_URL = `${origin}${projectRoot}/backend/public/index.php/api`;
+  const projectRoot = pathParts[1] ? `/${pathParts[1]}` : "";
+  API_BASE = `${origin}${projectRoot}`;
+  API_URL = `${origin}${projectRoot}/api`;
 }
 
 export { API_BASE, API_URL };
