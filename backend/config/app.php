@@ -24,11 +24,11 @@ return [
         'timezone' => getEnv2('APP_TIMEZONE', 'America/Sao_Paulo'),
     ],
     'database' => [
-        'host' => getEnv2('DB_HOST', '127.0.0.1'),
-        'port' => getEnv2('DB_PORT', '3306'),
-        'name' => getEnv2('DB_NAME', 'railway'),
-        'user' => getEnv2('DB_USER', 'root'),
-        'pass' => getEnv2('DB_PASS', ''),
+        'host' => getEnv2('DB_HOST', getEnv2('MYSQLHOST', '127.0.0.1')),
+        'port' => getEnv2('DB_PORT', getEnv2('MYSQLPORT', '3306')),
+        'name' => getEnv2('DB_NAME', getEnv2('MYSQL_DATABASE', 'railway')),
+        'user' => getEnv2('DB_USER', getEnv2('MYSQLUSER', 'root')),
+        'pass' => getEnv2('DB_PASS', getEnv2('MYSQLPASSWORD', '')),
         'charset' => 'utf8mb4',
     ],
     'security' => [
