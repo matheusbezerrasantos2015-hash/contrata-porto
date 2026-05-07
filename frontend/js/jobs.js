@@ -152,12 +152,14 @@ async function preloadUserStates() {
     ]);
 
     const applicationsData = normalizeApiResponse(applicationsResponse);
-    applicationsData.forEach((application) => {
+    const applications = Array.isArray(applicationsData) ? applicationsData : (applicationsData.items || []);
+    applications.forEach((application) => {
       appliedJobs.add(Number(application.vaga_id));
     });
 
     const favoritesData = normalizeApiResponse(favoritesResponse);
-    favoritesData.forEach((favorite) => {
+    const favorites = Array.isArray(favoritesData) ? favoritesData : (favoritesData.items || []);
+    favorites.forEach((favorite) => {
       favoritesMap.set(Number(favorite.vaga_id), Number(favorite.vaga_id));
     });
   } catch (_) {
@@ -233,9 +235,9 @@ async function loadJobs() {
     // O normalizeApiResponse retornará { vagas: [...], pagination: { ... } }
     const data = normalizeApiResponse(response);
     
-    currentItems = data.vagas || [];
+    currentItems = data.vagas || data.items || (Array.isArray(data) ? data : []);
     renderJobs(currentItems);
-    renderPagination(data.pagination);
+    renderPagination(data.pagination || {});
     
     stopFaviconPulse();
   } catch (error) {

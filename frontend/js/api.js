@@ -14,18 +14,50 @@ export function getToken() {
 }
 
 export function normalizeApiResponse(response) {
-  if (!response) return null;
-  // Se for sucesso mas sem data (ex: DELETE), retorna true ou o que veio
+  // Estrutura base para falhas: um array vazio com propriedade pagination
+  const createEmpty = () => {
+    const arr = [];
+    arr.pagination = { total: 0, page: 1, total_pages: 0 };
+    arr.vagas = arr;
+    arr.items = arr;
+    return arr;
+  };
+
+  if (!response) return createEmpty();
+  
+  // Se for sucesso mas sem data (ex: DELETE), retorna o próprio response
   if (response.success && response.data === undefined) return response;
 
   const data = response.data !== undefined ? response.data : response;
+  if (!data) return createEmpty();
 
-  // Caso de paginação: { items: [...], total: ... }
-  if (data && typeof data === 'object' && Array.isArray(data.items)) {
-    return data.items;
+  let result = [];
+  let pagination = { total: 0, page: 1, total_pages: 0 };
+
+  if (typeof data === 'object' && Array.isArray(data.items)) {
+    // Formato com paginação { items: [], meta: {} } ou { items: [], total: 0 }
+    result = data.items;
+    pagination = data.meta || {
+      total: data.total || data.items.length,
+      page: data.page || 1,
+      total_pages: data.total_pages || 1
+    };
+  } else if (Array.isArray(data)) {
+    // Formato array simples
+    result = data;
+    pagination = { total: data.length, page: 1, total_pages: 1 };
+  } else if (data && typeof data === 'object') {
+    // Caso já seja o objeto formatado ou outro objeto
+    if (Array.isArray(data.vagas)) return data; 
+    return data;
   }
+
+  // A MÁGICA: Retornamos o array mas anexamos as propriedades que o jobs.js e outros esperam
+  result.pagination = pagination;
+  result.vagas = result;
+  result.items = result;
   
-  return data;
+  return result;
 }
 
 export function getAuthHeaders() {
