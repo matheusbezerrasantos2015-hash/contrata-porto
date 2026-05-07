@@ -59,7 +59,8 @@ final class ApplicationController
             Response::json(false, 'Aguarde alguns segundos antes de nova candidatura.', null, 429);
         }
 
-        if (!$this->jobModel->findById($jobId)) {
+        $job = $this->jobModel->findById($jobId);
+        if (!$job) {
             Response::json(false, 'Not Found', null, 404);
         }
 
@@ -111,27 +112,29 @@ final class ApplicationController
             'curriculo_path' => $curriculoPath,
         ]);
 
-        try {
-            $job = $this->jobModel->findById($jobId);
-            if ($job) {
-                $empresa = $this->companyModel->findById((int)$job['empresa_id']);
-                ob_start();
-                $nomeUsuario = $user['nome'];
-                $tituloVaga = $job['titulo'];
-                $nomeEmpresa = $empresa ? $empresa['nome_fantasia'] : 'Empresa Confidencial';
-                include __DIR__ . '/../templates/emails/candidatura_confirmada.php';
-                $html = ob_get_clean();
-                
-                Mailer::send(
-                    $user['email'] ?? '',
-                    $user['nome'] ?? '',
-                    "Candidatura Confirmada - {$job['titulo']}",
-                    $html
-                );
+        // Etapa 2: Envio de e-mail postergado
+        register_shutdown_function(function() use ($user, $job) {
+            try {
+                if ($job) {
+                    $empresa = $this->companyModel->findById((int)$job['empresa_id']);
+                    ob_start();
+                    $nomeUsuario = $user['nome'];
+                    $tituloVaga = $job['titulo'];
+                    $nomeEmpresa = $empresa ? $empresa['nome_fantasia'] : 'Empresa Confidencial';
+                    include __DIR__ . '/../templates/emails/candidatura_confirmada.php';
+                    $html = ob_get_clean();
+                    
+                    Mailer::send(
+                        $user['email'] ?? '',
+                        $user['nome'] ?? '',
+                        "Candidatura Confirmada - {$job['titulo']}",
+                        $html
+                    );
+                }
+            } catch (\Exception $e) {
+                error_log("[ASYNC_MAIL_ERR] Erro na candidatura: " . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            error_log("Erro ao enviar email de confirmacao de candidatura: " . $e->getMessage());
-        }
+        });
 
         Response::json(true, 'Candidatura enviada com sucesso.', ['id' => $applicationId], 201);
     }
@@ -196,46 +199,33 @@ final class ApplicationController
             Response::json(false, 'Not Found', null, 404);
         }
 
-        // Email Notification Logic
-        try {
-            $emailData = $this->applicationModel->findByIdWithEmailData($id);
+        // Notificação de e-mail postergada
+        register_shutdown_function(function() use ($id, $status) {
+            try {
+                $emailData = $this->applicationModel->findByIdWithEmailData($id);
+                $templates = [
+                    'APROVADO'   => 'status_aprovado',
+                    'RECUSADO'   => 'status_recusado',
+                    'EM_ANALISE' => 'status_em_analise',
+                ];
 
-            $templates = [
-                'APROVADO'   => 'status_aprovado',
-                'RECUSADO'   => 'status_recusado',
-                'EM_ANALISE' => 'status_em_analise',
-            ];
+                $template = $templates[$status] ?? null;
+                $candidatoEmail = $emailData['candidato_email'] ?? '';
 
-            $template = $templates[$status] ?? null;
+                if ($template && !empty($candidatoEmail)) {
+                    ob_start();
+                    $nome = $emailData['candidato_nome']  ?? '';
+                    $vaga = $emailData['vaga_titulo']     ?? 'Vaga';
+                    $nomeEmpresa = $emailData['empresa_nome']    ?? 'Empresa Confidencial';
+                    include __DIR__ . "/../templates/emails/{$template}.php";
+                    $html = ob_get_clean();
 
-            $candidatoEmail = $emailData['candidato_email'] ?? '';
-            $candidatoNome  = $emailData['candidato_nome']  ?? '';
-            $vagaTitulo     = $emailData['vaga_titulo']     ?? 'Vaga';
-            $empresaNome    = $emailData['empresa_nome']    ?? 'Empresa Confidencial';
-
-            error_log("[STATUS EMAIL] Tentando enviar para: {$candidatoEmail} | Status: {$status} | Template: {$template}");
-
-            if ($template && !empty($candidatoEmail)) {
-                ob_start();
-                $nome       = $candidatoNome;
-                $vaga       = $vagaTitulo;
-                $nomeEmpresa = $empresaNome;
-                include __DIR__ . "/../templates/emails/{$template}.php";
-                $html = ob_get_clean();
-
-                $resultado = Mailer::send(
-                    $candidatoEmail,
-                    $candidatoNome,
-                    "Atualização da sua candidatura — {$vagaTitulo}",
-                    $html
-                );
-                error_log("[STATUS EMAIL] Resultado: " . ($resultado ? 'OK' : 'FALHOU'));
-            } else {
-                error_log("[STATUS EMAIL] Pulado — template ou email inválido. emailData: " . json_encode($emailData));
+                    Mailer::send($candidatoEmail, $nome, "Atualização da sua candidatura — {$vaga}", $html);
+                }
+            } catch (\Exception $e) {
+                error_log("[ASYNC_MAIL_ERR] Erro no updateStatus: " . $e->getMessage());
             }
-        } catch (Exception $e) {
-            error_log("[STATUS EMAIL] Exception: " . $e->getMessage());
-        }
+        });
 
         Response::json(true, 'Status atualizado com sucesso.', null, 200);
     }

@@ -73,23 +73,35 @@ final class AuthController
         try {
             $userId = $this->authService->register($nome, $email, $senha, $role, $companyData);
 
-            // Envio de Email de Boas-Vindas em Try/Catch separado para não travar o cadastro
-            try {
-                if ($role === 'CANDIDATO') {
-                    ob_start();
-                    include __DIR__ . '/../templates/emails/boas_vindas_candidato.php';
-                    $html = ob_get_clean();
-                    Mailer::send($email, $nome, 'Bem-vindo(a) ao ContrataPorto! 👋', $html);
-                } else if ($role === 'EMPRESA') {
-                    ob_start();
-                    $nome_fantasia = $companyData['nome_fantasia'];
-                    include __DIR__ . '/../templates/emails/boas_vindas_empresa.php';
-                    $html = ob_get_clean();
-                    Mailer::send($companyData['email_contato'], $nome_fantasia, 'Sua empresa está no ContrataPorto! 🎉', $html);
+            // Captura dados para o e-mail diferido
+            $emailPayload = [
+                'email' => $email,
+                'nome' => $nome,
+                'role' => $role,
+                'company_email' => $companyData['email_contato'] ?? $email,
+                'nome_fantasia' => $companyData['nome_fantasia'] ?? $nome
+            ];
+
+            // Etapa 2 (Assíncrona/Diferida): Envio de E-mail após a resposta
+            register_shutdown_function(function() use ($emailPayload) {
+                try {
+                    if ($emailPayload['role'] === 'CANDIDATO') {
+                        ob_start();
+                        $nome = $emailPayload['nome'];
+                        include __DIR__ . '/../templates/emails/boas_vindas_candidato.php';
+                        $html = ob_get_clean();
+                        Mailer::send($emailPayload['email'], $emailPayload['nome'], 'Bem-vindo(a) ao ContrataPorto! 👋', $html);
+                    } else if ($emailPayload['role'] === 'EMPRESA') {
+                        ob_start();
+                        $nome_fantasia = $emailPayload['nome_fantasia'];
+                        include __DIR__ . '/../templates/emails/boas_vindas_empresa.php';
+                        $html = ob_get_clean();
+                        Mailer::send($emailPayload['company_email'], $emailPayload['nome_fantasia'], 'Sua empresa está no ContrataPorto! 🎉', $html);
+                    }
+                } catch (\Exception $mailEx) {
+                    error_log("[ASYNC_MAIL_ERR] Erro no registro: " . $mailEx->getMessage());
                 }
-            } catch (\Exception $mailEx) {
-                error_log("Erro ao enviar email de boas-vindas: " . $mailEx->getMessage());
-            }
+            });
 
             Response::json(true, "Cadastro realizado com sucesso.", ['id' => $userId], 201);
         } catch (\Exception $e) {
@@ -161,16 +173,17 @@ final class AuthController
 
             error_log("[RESET] Token gerado para: {$email}");
 
-            try {
-                $nome = $user['nome'] ?? 'Usuário';
-                ob_start();
-                include __DIR__ . '/../templates/emails/recuperacao_senha.php';
-                $html = ob_get_clean();
-
-                Mailer::send($email, $nome, 'Redefinir sua senha no ContrataPorto', $html);
-            } catch (\Exception $e) {
-                error_log("[RESET] Erro ao enviar e-mail: " . $e->getMessage());
-            }
+            register_shutdown_function(function() use ($email, $user, $resetLink) {
+                try {
+                    $nome = $user['nome'] ?? 'Usuário';
+                    ob_start();
+                    include __DIR__ . '/../templates/emails/recuperacao_senha.php';
+                    $html = ob_get_clean();
+                    Mailer::send($email, $nome, 'Redefinir sua senha no ContrataPorto', $html);
+                } catch (\Exception $e) {
+                    error_log("[ASYNC_MAIL_ERR] Erro no reset: " . $e->getMessage());
+                }
+            });
         }
 
         // Retorna sucesso mesmo se não encontrar para segurança
