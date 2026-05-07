@@ -11,5 +11,5 @@ COPY . .
 
 EXPOSE 8080
 
-# Usamos o formato shell (sem colchetes) para permitir a expansão da variável $PORT pelo Railway
-CMD php -S 0.0.0.0:$PORT -t /app/backend/public
+# Servindo a partir da raiz /app para permitir acesso ao frontend e backend
+CMD php -S 0.0.0.0:$PORT -t /app
