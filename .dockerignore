@@ -1,0 +1,16 @@
+# Secrets e variáveis de ambiente
+.env
+.env.local
+
+# Git
+.git
+.gitignore
+
+# Uploads (efêmeros de qualquer forma)
+uploads/
+
+# Logs
+*.log
+
+# Documentação
+*.md
