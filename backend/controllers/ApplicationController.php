@@ -113,10 +113,11 @@ final class ApplicationController
         ]);
 
         // Etapa 2: Envio de e-mail postergado
-        register_shutdown_function(function() use ($user, $job) {
+        $companyModel = $this->companyModel;
+        register_shutdown_function(function() use ($user, $job, $companyModel) {
             try {
                 if ($job) {
-                    $empresa = $this->companyModel->findById((int)$job['empresa_id']);
+                    $empresa = $companyModel->findById((int)$job['empresa_id']);
                     ob_start();
                     $nomeUsuario = $user['nome'];
                     $tituloVaga = $job['titulo'];
@@ -200,9 +201,10 @@ final class ApplicationController
         }
 
         // Notificação de e-mail postergada
-        register_shutdown_function(function() use ($id, $status) {
+        $applicationModel = $this->applicationModel;
+        register_shutdown_function(function() use ($id, $status, $applicationModel) {
             try {
-                $emailData = $this->applicationModel->findByIdWithEmailData($id);
+                $emailData = $applicationModel->findByIdWithEmailData($id);
                 $templates = [
                     'APROVADO'   => 'status_aprovado',
                     'RECUSADO'   => 'status_recusado',
