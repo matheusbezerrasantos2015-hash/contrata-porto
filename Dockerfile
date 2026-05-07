@@ -11,5 +11,5 @@ COPY . .
 
 EXPOSE 8080
 
-# O Railway injeta a variável $PORT automaticamente
-CMD ["php", "-S", "0.0.0.0:$PORT", "-t", "/app/backend/public"]
+# Usamos o formato shell (sem colchetes) para permitir a expansão da variável $PORT pelo Railway
+CMD php -S 0.0.0.0:$PORT -t /app/backend/public
