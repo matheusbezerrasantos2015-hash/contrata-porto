@@ -1,12 +1,12 @@
 const CACHE_NAME = 'contrataporto-v1';
 const ASSETS = [
-  '/ContrataPorto/frontend/pages/index.html',
-  '/ContrataPorto/frontend/css/index.css',
-  '/ContrataPorto/frontend/js/api.js',
-  '/ContrataPorto/frontend/js/auth.js',
-  '/ContrataPorto/frontend/js/ui.js',
-  '/ContrataPorto/frontend/assets/favicon.png',
-  '/ContrataPorto/frontend/assets/textlogo.png'
+  '/frontend/pages/index.html',
+  '/frontend/css/index.css',
+  '/frontend/js/api.js',
+  '/frontend/js/auth.js',
+  '/frontend/js/ui.js',
+  '/frontend/assets/favicon.png',
+  '/frontend/assets/textlogo.png'
 ];
 
 self.addEventListener('install', e => {

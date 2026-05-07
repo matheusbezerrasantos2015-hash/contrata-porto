@@ -1,8 +1,8 @@
 // Limpa qualquer URL antiga que possa estar no localStorage (legado)
 ["api_base_url", "api_url"].forEach((key) => {
   const val = localStorage.getItem(key);
-  if (val && !val.includes("ContrataPorto")) {
-    console.warn("[CONFIG] Removendo URL legada do localStorage:", val);
+  if (val && !val.startsWith(window.location.origin)) {
+    console.warn("[CONFIG] Removendo URL de origem diferente do localStorage:", val);
     localStorage.removeItem(key);
   }
 });
