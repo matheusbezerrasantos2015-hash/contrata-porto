@@ -2,6 +2,18 @@ import { applyToJob, getFavorites, getJobById, getMyApplications, removeFavorite
 import { isAuthenticated, redirectToLogin } from './auth.js';
 import { renderSkeleton, setButtonLoading, showToast, withGlobalLoader } from './ui.js';
 import { stopFaviconPulse } from './layout.js';
+import { escapeHTML } from './utils.js';
+
+/**
+ * Converte texto simples com quebras de linha em HTML seguro.
+ * Cada linha é escapada individualmente e separada por <br>.
+ * @param {string} str
+ * @returns {string}
+ */
+function safeMultiline(str) {
+  if (!str) return '';
+  return str.split('\n').map(escapeHTML).join('<br>');
+}
 
 const jobContainer = document.getElementById('jobContainer');
 const feedback = document.getElementById('feedback');
@@ -80,26 +92,26 @@ async function loadJob() {
     const response = await withGlobalLoader(() => getJobById(jobId));
     const job = normalizeApiResponse(response);
 
-    document.title = `${job.titulo} | ContrataPorto`;
+    document.title = `${escapeHTML(job.titulo)} | ContrataPorto`;
 
     jobContainer.innerHTML = `
       <div class="job-header-detailed section-card mb-4">
-        <div class="company mb-1">${job.empresa_nome || 'Empresa Local'}</div>
-        <h1 style="font-size: var(--font-3xl); font-weight: 800; margin-bottom: var(--space-1);">${job.titulo || 'Título não informado'}</h1>
+        <div class="company mb-1">${escapeHTML(job.empresa_nome || 'Empresa Local')}</div>
+        <h1 style="font-size: var(--font-3xl); font-weight: 800; margin-bottom: var(--space-1);">${escapeHTML(job.titulo || 'Título não informado')}</h1>
         
         <div class="meta mb-3">
-          <span>📍 ${job.cidade || 'Porto Ferreira'} - ${job.estado || 'SP'}</span>
+          <span>📍 ${escapeHTML(job.cidade || 'Porto Ferreira')} - ${escapeHTML(job.estado || 'SP')}</span>
           <span>•</span>
-          <span>💼 ${job.tipo_contrato || 'CLT'} (${job.tipo_vaga || 'Presencial'})</span>
+          <span>💼 ${escapeHTML(job.tipo_contrato || 'CLT')} (${escapeHTML(job.tipo_vaga || 'Presencial')})</span>
           <span>•</span>
           <span>📅 Publicada em ${job.publicada_em ? new Date(job.publicada_em).toLocaleDateString('pt-BR') : 'Recente'}</span>
         </div>
 
         <div class="chips">
-          <span class="chip">${job.nivel || 'Nível não informado'}</span>
-          <span class="chip">${job.area || 'Área não informada'}</span>
-          <span class="chip">${job.experiencia ? job.experiencia.replace(/_/g, ' ') : 'Experiência não informada'}</span>
-          ${job.carga_horaria ? `<span class="chip">🕒 ${job.carga_horaria}</span>` : ''}
+          <span class="chip">${escapeHTML(job.nivel || 'Nível não informado')}</span>
+          <span class="chip">${escapeHTML(job.area || 'Área não informada')}</span>
+          <span class="chip">${escapeHTML(job.experiencia ? job.experiencia.replace(/_/g, ' ') : 'Experiência não informada')}</span>
+          ${job.carga_horaria ? `<span class="chip">🕒 ${escapeHTML(job.carga_horaria)}</span>` : ''}
         </div>
       </div>
 
@@ -116,7 +128,7 @@ async function loadJob() {
           </div>
           <div class="info-item">
             <span style="font-size: var(--font-xs); color: var(--gray-500); display: block; text-transform: uppercase;">Contrato</span>
-            <span style="font-weight: 600;">${job.tipo_contrato || 'Informar na entrevista'}</span>
+            <span style="font-weight: 600;">${escapeHTML(job.tipo_contrato || 'Informar na entrevista')}</span>
           </div>
         </div>
       </div>
@@ -124,7 +136,7 @@ async function loadJob() {
       <div class="section-card mb-4">
         <h2 style="font-size: var(--font-xl); font-weight: 700; margin-bottom: var(--space-3);">Descrição da Vaga</h2>
         <div class="rich-text">
-          ${(job.descricao || 'Nenhuma descrição detalhada fornecida.').replace(/\n/g, '<br>')}
+          ${safeMultiline(job.descricao) || 'Nenhuma descrição detalhada fornecida.'}
         </div>
       </div>
 
@@ -133,19 +145,19 @@ async function loadJob() {
         ${job.requisitos ? `
         <div>
           <h3 class="mb-2" style="font-weight: 700;">Requisitos</h3>
-          <div class="rich-text">${job.requisitos.replace(/\n/g, '<br>')}</div>
+          <div class="rich-text">${safeMultiline(job.requisitos)}</div>
         </div>` : ''}
         
         ${job.beneficios ? `
         <div>
           <h3 class="mb-2" style="font-weight: 700;">Benefícios</h3>
-          <div class="rich-text">${job.beneficios.replace(/\n/g, '<br>')}</div>
+          <div class="rich-text">${safeMultiline(job.beneficios)}</div>
         </div>` : ''}
 
         ${job.diferenciais ? `
         <div style="grid-column: 1 / -1; margin-top: 1rem; border-top: 1px solid var(--gray-100); padding-top: 1rem;">
           <h3 class="mb-2" style="font-weight: 700;">Diferenciais</h3>
-          <div class="rich-text">${job.diferenciais.replace(/\n/g, '<br>')}</div>
+          <div class="rich-text">${safeMultiline(job.diferenciais)}</div>
         </div>` : ''}
       </div>` : ''}
     `;

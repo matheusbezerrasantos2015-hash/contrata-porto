@@ -2,6 +2,7 @@ import { applyToJob, getFavorites, getJobs, getMyApplications, removeFavorite, s
 import { isAuthenticated, redirectToLogin } from './auth.js';
 import { renderSkeleton, setButtonLoading, showToast, withGlobalLoader, renderEmptyState } from './ui.js';
 import { stopFaviconPulse } from './layout.js';
+import { escapeHTML } from './utils.js';
 
 const jobsList = document.getElementById('jobsList');
 const filtersForm = document.getElementById('filtersForm');
@@ -99,22 +100,23 @@ function createJobCard(job) {
   const hasApplied = appliedJobs.has(job.id);
   const hasSaved = favoritesMap.has(job.id);
 
+  // Estrutura HTML estática — dados da API escapados com escapeHTML para prevenir XSS
   article.innerHTML = `
-    <div class="company">${job.empresa_nome || 'Empresa Local'}</div>
-    <h3>${job.titulo}</h3>
+    <div class="company">${escapeHTML(job.empresa_nome || 'Empresa Local')}</div>
+    <h3>${escapeHTML(job.titulo)}</h3>
     <div class="meta">
-      <span>${job.cidade || 'Porto Ferreira'}</span>
+      <span>${escapeHTML(job.cidade || 'Porto Ferreira')}</span>
       <span>•</span>
-      <span>${job.tipo_contrato || 'CLT'}</span>
+      <span>${escapeHTML(job.tipo_contrato || 'CLT')}</span>
     </div>
-    ${job.total_candidatos > 0 ? `<span class="job-candidates">👥 ${job.total_candidatos} candidato(s)</span>` : ''}
+    ${job.total_candidatos > 0 ? `<span class="job-candidates">👥 ${escapeHTML(String(job.total_candidatos))} candidato(s)</span>` : ''}
     <div class="chips" style="margin-top: 8px;">
       ${isNewJob(job) ? '<span class="badge badge-info">Nova</span>' : ''}
-      ${job.nivel ? `<span class="chip">${job.nivel}</span>` : ''}
+      ${job.nivel ? `<span class="chip">${escapeHTML(job.nivel)}</span>` : ''}
     </div>
     <div class="card-actions" style="margin-top: auto; padding-top: 16px;">
-      <a class="btn btn-secondary" href="./job.html?id=${job.id}" style="flex: 1;">Ver detalhes</a>
-      <button class="btn btn-ghost" data-favorite-id="${job.id}" title="${hasSaved ? 'Remover dos favoritos' : 'Salvar vaga'}">
+      <a class="btn btn-secondary" href="./job.html?id=${encodeURIComponent(job.id)}" style="flex: 1;">Ver detalhes</a>
+      <button class="btn btn-ghost" data-favorite-id="${encodeURIComponent(job.id)}" title="${hasSaved ? 'Remover dos favoritos' : 'Salvar vaga'}">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="${hasSaved ? 'var(--brand-500)' : 'none'}" stroke="currentColor" stroke-width="2">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg>

@@ -2,6 +2,7 @@ import { getMyApplications, normalizeApiResponse, getAuthHeaders } from './api.j
 import { requireAuth } from './auth.js';
 import { renderSkeleton, showToast, statusBadge, renderEmptyState } from './ui.js';
 import { stopFaviconPulse } from './layout.js';
+import { escapeHTML } from './utils.js';
 
 requireAuth({ role: 'candidato' });
 console.log("[TOKEN USADO NA DASHBOARD]", localStorage.getItem("token"));
@@ -45,11 +46,11 @@ function renderApplications(applications) {
     .map((item) => `
       <article class="card job-card" style="padding: var(--space-3); display: flex; flex-direction: column;">
         <h3 style="font-size: var(--font-md); font-weight: 700; color: var(--slate-900); margin-bottom: 2px;">
-          ${item.titulo}
+          ${escapeHTML(item.titulo)}
         </h3>
         
         <div class="company-city mb-1" style="font-size: var(--font-xs); font-weight: 500; color: var(--slate-600);">
-          ${item.nome_fantasia} • ${item.cidade || 'Porto Ferreira'}
+          ${escapeHTML(item.nome_fantasia)} • ${escapeHTML(item.cidade || 'Porto Ferreira')}
         </div>
 
         <div class="meta mb-2" style="font-size: var(--font-xs); color: var(--slate-500);">

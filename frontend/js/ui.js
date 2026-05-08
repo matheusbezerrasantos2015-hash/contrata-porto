@@ -1,3 +1,5 @@
+import { escapeHTML } from './utils.js';
+
 const toastRoot = (() => {
   let root = document.getElementById('toastRoot');
   if (!root) {
@@ -60,11 +62,14 @@ export function showToast(message, type = 'info') {
     info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
   };
 
+  // Ícones são literais HTML estáticos (sem dados do usuário)
   item.innerHTML = `
     <span class="toast-icon">${icons[type] || icons.info}</span>
-    <span class="toast-message">${message}</span>
+    <span class="toast-message"></span>
   `;
-  
+  // Mensagem inserida via textContent para prevenir XSS
+  item.querySelector('.toast-message').textContent = message;
+
   toastRoot.appendChild(item);
 
   setTimeout(() => {
@@ -114,13 +119,44 @@ export function confirmAction(message) {
 export function renderEmptyState(container, { title, message, ctaText, ctaHref, ctaId }) {
   if (!container) return;
 
-  container.innerHTML = `
-    <div class="empty-state">
-      <img src="../assets/favicon.png" alt="" class="empty-state-icon">
-      <p class="empty-state-title empty-title">${title || 'Nenhum resultado'}</p>
-      <p class="empty-state-subtitle empty-message">${message || 'Tente ajustar os filtros ou buscar novamente.'}</p>
-      ${ctaText && ctaHref ? `<a href="${ctaHref}" class="btn btn-primary" style="margin-top: 1rem;">${ctaText}</a>` : ''}
-      ${ctaText && ctaId ? `<button id="${ctaId}" class="btn btn-primary" style="margin-top: 1rem;">${ctaText}</button>` : ''}
-    </div>
-  `;
+  // Estrutura estática — dados dinâmicos inseridos via textContent (sem risco de XSS)
+  const wrapper = document.createElement('div');
+  wrapper.className = 'empty-state';
+
+  const img = document.createElement('img');
+  img.src = '../assets/favicon.png';
+  img.alt = '';
+  img.className = 'empty-state-icon';
+  wrapper.appendChild(img);
+
+  const pTitle = document.createElement('p');
+  pTitle.className = 'empty-state-title empty-title';
+  pTitle.textContent = title || 'Nenhum resultado';
+  wrapper.appendChild(pTitle);
+
+  const pMsg = document.createElement('p');
+  pMsg.className = 'empty-state-subtitle empty-message';
+  pMsg.textContent = message || 'Tente ajustar os filtros ou buscar novamente.';
+  wrapper.appendChild(pMsg);
+
+  if (ctaText && ctaHref) {
+    const a = document.createElement('a');
+    a.href = ctaHref;           // href é sempre URL interna controlada pelo código
+    a.className = 'btn btn-primary';
+    a.style.marginTop = '1rem';
+    a.textContent = ctaText;
+    wrapper.appendChild(a);
+  }
+
+  if (ctaText && ctaId) {
+    const btn = document.createElement('button');
+    btn.id = ctaId;
+    btn.className = 'btn btn-primary';
+    btn.style.marginTop = '1rem';
+    btn.textContent = ctaText;
+    wrapper.appendChild(btn);
+  }
+
+  container.innerHTML = '';
+  container.appendChild(wrapper);
 }

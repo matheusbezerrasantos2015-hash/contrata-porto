@@ -2,6 +2,7 @@ import API, { createJob, getJobApplications, getApplicationById, getJobs, update
 import { getAuthState, requireAuth, isAuthenticated, redirectToLogin } from './auth.js';
 import { confirmAction, renderSkeleton, setButtonLoading, showToast, statusBadge, renderEmptyState } from './ui.js';
 import { stopFaviconPulse } from './layout.js';
+import { escapeHTML } from './utils.js';
 
 requireAuth({ role: 'empresa' });
 
@@ -47,13 +48,15 @@ function renderCompanyJobs(jobs) {
     const isConcluded = job.status === 'CONCLUIDA';
     const statusText = isPaused ? 'Ativar' : 'Pausar';
     
+    // Dados dinâmicos (titulo, cargo, tipo_contrato) são escapados
+    // IDs numéricos usados em data-attributes não precisam de escape
     item.innerHTML = `
       <div style="font-weight: 700; color: var(--slate-900); display: flex; align-items: center; justify-content: space-between;">
-        <span>${job.titulo}</span>
+        <span>${escapeHTML(job.titulo)}</span>
         ${statusBadge(job.status)}
       </div>
       <div style="font-size: var(--font-xs); color: var(--slate-500); margin-top: 4px;">
-        ${job.cargo} • ${job.tipo_contrato}
+        ${escapeHTML(job.cargo)} • ${escapeHTML(job.tipo_contrato)}
       </div>
       <div style="display:flex; flex-direction: column; gap: 6px; margin-top: 10px;">
         <div style="display:flex; gap: 6px;">
@@ -87,8 +90,8 @@ function renderCandidates(candidates) {
     .map((item) => `
       <article class="candidate-card card">
         <div class="candidate-info">
-          <h4>${item.candidato_nome}</h4>
-          <p>${item.candidato_email}</p>
+          <h4>${escapeHTML(item.candidato_nome)}</h4>
+          <p>${escapeHTML(item.candidato_email)}</p>
           <div class="mt-1">${statusBadge(item.status)}</div>
         </div>
         <div class="candidate-actions" style="display: flex; gap: var(--space-1); margin-top: var(--space-2); width: 100%;">
@@ -169,18 +172,20 @@ async function openCandidateModal(id) {
     const item = normalizeApiResponse(response);
     const initials = getInitials(item.candidato_nome);
     
+    // Dados de texto do candidato são escapados para prevenir XSS
+    // URLs (linkedin, portfolio) são usadas apenas em href e validadas pelo browser
     candidateModalContent.innerHTML = `
       <div style="text-align: center; padding: var(--space-2);">
         <div style="width: 72px; height: 72px; background: var(--slate-100); color: var(--slate-600); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3); font-size: 24px; font-weight: 700; border: 2px solid var(--white); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-          ${initials}
+          ${escapeHTML(initials)}
         </div>
-        <h2 style="font-size: var(--font-lg); font-weight: 700; color: var(--slate-900);">${item.candidato_nome}</h2>
+        <h2 style="font-size: var(--font-lg); font-weight: 700; color: var(--slate-900);">${escapeHTML(item.candidato_nome)}</h2>
         <div style="color: var(--slate-500); font-size: var(--font-sm); display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px;">
-          <a href="mailto:${item.candidato_email}" style="color: inherit; text-decoration: none;" title="Enviar e-mail">${item.candidato_email}</a>
+          <a href="mailto:${escapeHTML(item.candidato_email)}" style="color: inherit; text-decoration: none;" title="Enviar e-mail">${escapeHTML(item.candidato_email)}</a>
         </div>
         <div style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
           ${item.telefone ? `
-            <span style="font-size: var(--font-sm); color: var(--slate-600);">${item.telefone}</span>
+            <span style="font-size: var(--font-sm); color: var(--slate-600);">${escapeHTML(item.telefone)}</span>
             <a href="${formatWhatsAppLink(item.telefone)}"
                target="_blank"
                rel="noopener noreferrer"
@@ -195,7 +200,7 @@ async function openCandidateModal(id) {
           ` : `
             <span style="font-size: var(--font-xs); color: var(--slate-400); font-style: italic;">
               Sem telefone cadastrado — entre em contato pelo
-              <a href="mailto:${item.candidato_email}" style="color: var(--brand-500); text-decoration: underline;">e-mail</a>
+              <a href="mailto:${escapeHTML(item.candidato_email)}" style="color: var(--brand-500); text-decoration: underline;">e-mail</a>
             </span>
           `}
         </div>
@@ -204,18 +209,18 @@ async function openCandidateModal(id) {
       <div style="margin-top: var(--space-4); border-top: 1px solid var(--slate-100); padding-top: var(--space-4);">
         <h3 style="font-size: var(--font-sm); text-transform: uppercase; color: var(--slate-500); letter-spacing: 0.05em; margin-bottom: var(--space-2);">Carta de Apresentação</h3>
         <p style="color: var(--slate-700); line-height: 1.6; background: var(--slate-50); padding: var(--space-3); border-radius: 8px; font-size: var(--font-sm);">
-          ${item.mensagem || 'Nenhuma mensagem enviada.'}
+          ${escapeHTML(item.mensagem || 'Nenhuma mensagem enviada.')}
         </p>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-4);">
         <div>
           <h3 style="font-size: var(--font-xs); text-transform: uppercase; color: var(--slate-500); margin-bottom: 4px;">LinkedIn</h3>
-          ${item.linkedin ? `<a href="${item.linkedin}" target="_blank" class="btn btn-ghost" style="width: 100%; justify-content: flex-start; padding: 0 8px; font-size: var(--font-xs); height: 32px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Acessar Perfil</a>` : '<span style="font-size: var(--font-xs); color: var(--slate-400);">Não informado</span>'}
+          ${item.linkedin ? `<a href="${escapeHTML(item.linkedin)}" target="_blank" class="btn btn-ghost" style="width: 100%; justify-content: flex-start; padding: 0 8px; font-size: var(--font-xs); height: 32px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Acessar Perfil</a>` : '<span style="font-size: var(--font-xs); color: var(--slate-400);">Não informado</span>'}
         </div>
         <div>
           <h3 style="font-size: var(--font-xs); text-transform: uppercase; color: var(--slate-500); margin-bottom: 4px;">Portfólio</h3>
-          ${item.portfolio ? `<a href="${item.portfolio}" target="_blank" class="btn btn-ghost" style="width: 100%; justify-content: flex-start; padding: 0 8px; font-size: var(--font-xs); height: 32px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ver Portfólio</a>` : '<span style="font-size: var(--font-xs); color: var(--slate-400);">Não informado</span>'}
+          ${item.portfolio ? `<a href="${escapeHTML(item.portfolio)}" target="_blank" class="btn btn-ghost" style="width: 100%; justify-content: flex-start; padding: 0 8px; font-size: var(--font-xs); height: 32px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Ver Portfólio</a>` : '<span style="font-size: var(--font-xs); color: var(--slate-400);">Não informado</span>'}
         </div>
       </div>
 

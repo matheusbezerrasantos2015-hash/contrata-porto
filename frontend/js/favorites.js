@@ -1,6 +1,7 @@
 import { getFavorites, removeFavorite, normalizeApiResponse } from './api.js';
 import { requireAuth } from './auth.js';
 import { confirmAction, renderSkeleton, setButtonLoading, showToast, renderEmptyState } from './ui.js';
+import { escapeHTML } from './utils.js';
 
 requireAuth({ role: 'candidato' });
 
@@ -23,15 +24,15 @@ function renderFavorites(items) {
   list.innerHTML = items
     .map((item) => `
       <article class="card job-card">
-        <div class="company">${item.empresa_nome || 'Empresa Local'}</div>
-        <h3>${item.titulo}</h3>
+        <div class="company">${escapeHTML(item.empresa_nome || 'Empresa Local')}</div>
+        <h3>${escapeHTML(item.titulo)}</h3>
         <div class="meta">
-          <span>${item.cidade || 'Porto Ferreira'}</span>
+          <span>${escapeHTML(item.cidade || 'Porto Ferreira')}</span>
           <span>•</span>
-          <span>${item.tipo_contrato || 'CLT'}</span>
+          <span>${escapeHTML(item.tipo_contrato || 'CLT')}</span>
         </div>
         <div class="card-actions" style="margin-top: auto; padding-top: 16px;">
-          <a class="btn btn-secondary" href="./job.html?id=${item.vaga_id}" style="flex: 1;">Ver detalhes</a>
+          <a class="btn btn-secondary" href="./job.html?id=${encodeURIComponent(item.vaga_id)}" style="flex: 1;">Ver detalhes</a>
           <button class="btn btn-ghost" data-remove-id="${item.id}" title="Remover dos favoritos" style="color: var(--error-600);">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--error-500)" stroke="currentColor" stroke-width="2">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
