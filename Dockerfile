@@ -1,9 +1,9 @@
 FROM php:8.2-cli-alpine
 
-# Instala dependências do sistema para mbstring e extensões PDO
-RUN apk add --no-cache oniguruma-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring \
-    && apk del oniguruma-dev
+# Instala dependências do sistema para mbstring, PDO e cURL
+RUN apk add --no-cache oniguruma-dev curl-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring curl \
+    && apk del oniguruma-dev curl-dev
 
 WORKDIR /app
 

@@ -1,60 +1,126 @@
 <?php
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+declare(strict_types=1);
 
-class Mailer {
-  private static function getEnv(string $key, mixed $default = null): mixed {
-    return $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key) ?: $default;
-  }
+/**
+ * Mailer — Envio de e-mails via API HTTP do Resend (resend.com)
+ *
+ * Utiliza cURL (HTTPS/443) em vez de SMTP (porta 587),
+ * contornando o bloqueio de portas SMTP do Railway.
+ *
+ * Variáveis de ambiente necessárias:
+ *   RESEND_API_KEY   — chave de API do Resend (obrigatória)
+ *   MAIL_FROM        — endereço remetente (deve ser de domínio verificado no Resend)
+ *   MAIL_FROM_NAME   — nome exibido do remetente (padrão: ContrataPorto)
+ *
+ * IMPORTANTE: enquanto o domínio não estiver verificado no Resend,
+ * use 'onboarding@resend.dev' como MAIL_FROM.
+ */
+class Mailer
+{
+    // ------------------------------------------------------------------ //
+    //  Helpers de ambiente                                                 //
+    // ------------------------------------------------------------------ //
 
-  public static function send(
-    string $toEmail,
-    string $toName,
-    string $subject,
-    string $htmlBody
-  ): bool {
-    require_once __DIR__ . '/../../vendor/autoload.php';
-    $mail = new PHPMailer(true);
-    try {
-      // Configurações do Servidor
-      $mail->isSMTP();
-      $mail->Host       = self::getEnv('MAIL_HOST', 'smtp.gmail.com');
-      $mail->SMTPAuth   = true;
-      $mail->Username   = self::getEnv('MAIL_USER', '');
-      $mail->Password   = self::getEnv('MAIL_PASS', '');
-      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-      $mail->Port       = (int)self::getEnv('MAIL_PORT', 587);
-      $mail->CharSet    = 'UTF-8';
-      
-      // Configurações de Timeout para evitar travamento
-      $mail->Timeout = 15; // Aumentado para 15s
-      $mail->SMTPConnectTimeout = 10; // Aumentado para 10s
-
-      // Debug (opcional - habilite se precisar ver logs detalhados de SMTP)
-      // $mail->SMTPDebug = 2; 
-
-      $mail->setFrom(
-        self::getEnv('MAIL_FROM', ''),
-        self::getEnv('MAIL_FROM_NAME', 'ContrataPorto')
-      );
-      $mail->addAddress($toEmail, $toName);
-      $mail->isHTML(true);
-      $mail->Subject = $subject;
-      $mail->Body    = $htmlBody;
-      
-      if ($mail->send()) {
-          error_log("[MAILER] Sucesso: Enviado para $toEmail — Assunto: $subject");
-          return true;
-      }
-      
-      error_log("[MAILER] Falha inesperada ao enviar para $toEmail");
-      return false;
-    } catch (Exception $e) {
-      error_log("[MAILER] EXCEPTION para $toEmail: " . $e->getMessage() . " | SMTP Error: " . $mail->ErrorInfo);
-      return false;
-    } catch (\Throwable $t) {
-      error_log("[MAILER] ERRO FATAL para $toEmail: " . $t->getMessage());
-      return false;
+    /**
+     * Lê variável de ambiente de todas as fontes disponíveis no PHP.
+     */
+    private static function env(string $key, string $default = ''): string
+    {
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+        return ($value !== false && $value !== null && $value !== '')
+            ? (string) $value
+            : $default;
     }
-  }
+
+    // ------------------------------------------------------------------ //
+    //  API pública                                                         //
+    // ------------------------------------------------------------------ //
+
+    /**
+     * Envia um e-mail via Resend API.
+     *
+     * @param string $toEmail  Endereço de e-mail do destinatário.
+     * @param string $toName   Nome do destinatário.
+     * @param string $subject  Assunto do e-mail.
+     * @param string $htmlBody Corpo do e-mail em HTML.
+     *
+     * @return bool true em caso de sucesso, false em caso de erro.
+     */
+    public static function send(
+        string $toEmail,
+        string $toName,
+        string $subject,
+        string $htmlBody
+    ): bool {
+        // --- Validações básicas -------------------------------------------
+
+        if (!filter_var($toEmail, FILTER_VALIDATE_EMAIL)) {
+            error_log('[MAILER] Endereço inválido: ' . $toEmail);
+            return false;
+        }
+
+        $apiKey = self::env('RESEND_API_KEY');
+
+        if ($apiKey === '') {
+            error_log('[MAILER] RESEND_API_KEY não configurada. E-mail NÃO enviado.');
+            return false;
+        }
+
+        // --- Montagem do payload -----------------------------------------
+
+        $fromAddress = self::env('MAIL_FROM', 'onboarding@resend.dev');
+        $fromName    = self::env('MAIL_FROM_NAME', 'ContrataPorto');
+        $from        = "{$fromName} <{$fromAddress}>";
+
+        $payload = json_encode([
+            'from'    => $from,
+            'to'      => ["{$toName} <{$toEmail}>"],
+            'subject' => $subject,
+            'html'    => $htmlBody,
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+
+        // --- Chamada à API do Resend via cURL ----------------------------
+
+        $ch = curl_init('https://api.resend.com/emails');
+
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            // Força TLS 1.2+ e valida certificado (produção)
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+        ]);
+
+        $response  = curl_exec($ch);
+        $httpCode  = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        // --- Tratamento de erros ----------------------------------------
+
+        if ($curlError !== '') {
+            error_log('[MAILER] cURL error ao contatar Resend: ' . $curlError);
+            return false;
+        }
+
+        // Resend retorna 200 ou 201 em sucesso
+        if ($httpCode !== 200 && $httpCode !== 201) {
+            error_log(
+                '[MAILER] Resend API error: HTTP ' . $httpCode .
+                ' | Resposta: ' . $response .
+                ' | Destinatário: ' . $toEmail
+            );
+            return false;
+        }
+
+        error_log('[MAILER] E-mail enviado com sucesso para ' . $toEmail . ' | Assunto: ' . $subject);
+        return true;
+    }
 }
