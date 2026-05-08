@@ -8,9 +8,14 @@ declare(strict_types=1);
  * contornando o bloqueio de portas SMTP do Railway.
  *
  * Variáveis de ambiente necessárias:
- *   RESEND_API_KEY   — chave de API do Resend (obrigatória)
- *   MAIL_FROM        — endereço remetente (deve ser de domínio verificado no Resend)
- *   MAIL_FROM_NAME   — nome exibido do remetente (padrão: ContrataPorto)
+ *   RESEND_API_KEY    — chave de API do Resend (obrigatória)
+ *   MAIL_FROM         — endereço remetente (deve ser de domínio verificado no Resend)
+ *   MAIL_FROM_NAME    — nome exibido do remetente (padrão: ContrataPorto)
+ *   MAIL_OVERRIDE_TO  — (opcional) redireciona TODOS os e-mails para este endereço.
+ *                       Útil durante desenvolvimento/plano gratuito do Resend sem
+ *                       domínio verificado, que só permite enviar ao próprio dono.
+ *                       O assunto recebe o prefixo "[Para: <destinatário original>]"
+ *                       para manter rastreabilidade.
  *
  * IMPORTANTE: enquanto o domínio não estiver verificado no Resend,
  * use 'onboarding@resend.dev' como MAIL_FROM.
@@ -64,6 +69,24 @@ class Mailer
         if ($apiKey === '') {
             error_log('[MAILER] RESEND_API_KEY não configurada. E-mail NÃO enviado.');
             return false;
+        }
+
+        // --- Fallback de destinatário (dev / Resend sem domínio verificado) ---
+        //
+        // Quando MAIL_OVERRIDE_TO está definido, todos os e-mails são
+        // redirecionados para esse endereço. O assunto ganha um prefixo
+        // "[Para: <email original>]" para rastreabilidade nos logs.
+
+        $overrideTo = self::env('MAIL_OVERRIDE_TO');
+
+        if ($overrideTo !== '') {
+            if (!filter_var($overrideTo, FILTER_VALIDATE_EMAIL)) {
+                error_log('[MAILER] MAIL_OVERRIDE_TO contém endereço inválido: ' . $overrideTo);
+                return false;
+            }
+            $subject = "[Para: {$toEmail}] " . $subject;
+            $toEmail = $overrideTo;
+            $toName  = 'ContrataPorto Dev';
         }
 
         // --- Montagem do payload -----------------------------------------
