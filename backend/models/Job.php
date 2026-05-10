@@ -51,23 +51,17 @@ final class Job
         return (int) $this->db->lastInsertId();
     }
 
-    public function findAll(int $page = 1, int $limit = 10): array
+    public function findAll(int $limite, int $offset, ?string $busca = null): array
     {
-        $offset = ($page - 1) * $limit;
-        $stmt = $this->db->prepare(
-            "SELECT v.*, e.nome_fantasia AS empresa_nome,
-                     (SELECT COUNT(*) FROM applications WHERE vaga_id = v.id) AS total_candidatos
-             FROM vagas v
-             INNER JOIN empresas e ON e.id = v.empresa_id
-             WHERE (v.status IN ('ATIVA', 'PAUSADA') OR (v.status = 'CONCLUIDA' AND v.data_expiracao > NOW()))
-             ORDER BY v.publicada_em DESC
-             LIMIT :limit OFFSET :offset"
-        );
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll();
+        $stmt = $this->db->prepare("CALL sp_listar_vagas_ativas(:limite, :offset, :busca)");
+        $stmt->execute([
+            ':limite' => $limite,
+            ':offset' => $offset,
+            ':busca'  => !empty($busca) ? $busca : null
+        ]);
+        $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $vagas;
     }
 
     public function findById(int $id): ?array

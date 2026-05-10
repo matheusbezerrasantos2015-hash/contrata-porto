@@ -64,10 +64,6 @@ final class ApplicationController
             Response::json(false, 'Not Found', null, 404);
         }
 
-        if ($this->applicationModel->existsForUserAndJob($user['id'], $jobId)) {
-            Response::json(false, 'Você já se candidatou para esta vaga.', null, 409);
-        }
-
         // Lógica de Upload de Currículo
         $curriculoPath = null;
         $file = Request::file('curriculo');
@@ -102,15 +98,26 @@ final class ApplicationController
             }
         }
 
-        $applicationId = $this->applicationModel->create([
-            'vaga_id' => $jobId,
-            'user_id' => $user['id'],
-            'mensagem' => $mensagem,
-            'linkedin' => $linkedin,
-            'portfolio' => $portfolio,
-            'telefone' => $telefone,
-            'curriculo_path' => $curriculoPath,
+        $db = Database::getConnection();
+        $stmt = $db->prepare("CALL sp_candidatar_vaga(:user_id, :vaga_id, :mensagem, :curriculo, @resultado)");
+        $stmt->execute([
+            ':user_id'   => $user['id'],
+            ':vaga_id'   => $jobId,
+            ':mensagem'  => $mensagem,
+            ':curriculo' => $curriculoPath
         ]);
+        $stmt->closeCursor();
+        $codigo = (int) $db->query("SELECT @resultado AS codigo")->fetchColumn();
+
+        if ($codigo === 1) {
+            Response::json(false, 'Esta vaga não está mais ativa.', null, 422);
+        } elseif ($codigo === 2) {
+            Response::json(false, 'Você já se candidatou a esta vaga.', null, 409);
+        } elseif ($codigo === 99) {
+            Response::json(false, 'Erro interno no banco de dados.', null, 500);
+        }
+
+        $applicationId = (int) $db->lastInsertId();
 
         // Etapa 2: Envio de e-mail postergado
         $companyModel = $this->companyModel;
@@ -185,19 +192,26 @@ final class ApplicationController
         $input = Request::json();
         $status = strtoupper((string) ($input['status'] ?? ''));
 
-        if ($id <= 0 || !in_array($status, ['EM_ANALISE', 'APROVADO', 'RECUSADO'], true)) {
+        if ($id <= 0) {
             Response::json(false, 'Dados inválidos para atualização de status.', null, 422);
         }
 
-        $application = $this->applicationModel->findById($id);
-        $companyId = (int) ($user['empresa_id'] ?? 0);
-        if (!$application || !$this->jobModel->belongsToCompany((int) $application['vaga_id'], $companyId)) {
-            Response::json(false, 'Forbidden', null, 403);
-        }
+        $db = Database::getConnection();
+        $stmt = $db->prepare("CALL sp_atualizar_status_candidatura(:app_id, :empresa_id, :status, @res)");
+        $stmt->execute([
+            ':app_id'     => $id,
+            ':empresa_id' => (int) $user['empresa_id'],
+            ':status'     => $status
+        ]);
+        $stmt->closeCursor();
+        $codigo = (int) $db->query("SELECT @res AS res")->fetchColumn();
 
-        $updated = $this->applicationModel->updateStatus($id, $status);
-        if (!$updated) {
-            Response::json(false, 'Not Found', null, 404);
+        if ($codigo === 1) {
+            Response::json(false, 'Forbidden', null, 403);
+        } elseif ($codigo === 2) {
+            Response::json(false, 'Status inválido.', null, 422);
+        } elseif ($codigo !== 0) {
+            Response::json(false, 'Erro interno no banco de dados.', null, 500);
         }
 
         // Notificação de e-mail postergada
