@@ -52,17 +52,39 @@ final class CompanyController
             Response::error('O nome da empresa não pode ficar vazio.', 400);
         }
 
+        $empresaId = $this->user['empresa_id'] ?? null;
+        
+        if (!$empresaId) {
+            Response::error('ID da empresa não encontrado no token.', 400);
+        }
+
         $db   = Database::getConnection();
         $stmt = $db->prepare(
             'UPDATE empresas SET nome_fantasia = ?, telefone = ?,
              updated_at = NOW()
-             WHERE user_id = ?'
+             WHERE id = ?'
         );
-        $stmt->execute([$nome_fantasia, $telefone, $userId]);
+        $stmt->execute([$nome_fantasia, $telefone, $empresaId]);
+
+        // Update user data to regenerate token
+        require_once __DIR__ . '/../models/User.php';
+        $userModel = new User();
+        $updatedUser = $userModel->findById($userId);
+
+        require_once __DIR__ . '/../core/JWTService.php';
+        $token = JWTService::generate([
+            'id' => (int) $updatedUser['id'],
+            'nome' => $updatedUser['nome'],
+            'email' => $updatedUser['email'],
+            'role' => strtoupper((string) $updatedUser['role']),
+            'empresa_id' => $updatedUser['empresa_id'] ?? null,
+            'nome_fantasia' => $nome_fantasia,
+        ]);
 
         Response::success('Dados atualizados com sucesso!', [
             'nome_fantasia' => $nome_fantasia,
             'telefone'      => $telefone,
+            'token'         => $token
         ]);
     }
 

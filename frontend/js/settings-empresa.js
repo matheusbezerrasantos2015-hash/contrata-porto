@@ -1,7 +1,7 @@
 import { API_URL } from './config.js';
 
 // ── auth ──────────────────────────────────────────────
-const token = localStorage.getItem('token');
+let token = localStorage.getItem('token');
 const role  = localStorage.getItem('user_role');
 
 if (!token || role?.toLowerCase() !== 'empresa') {
@@ -44,7 +44,8 @@ function setLoading(btn, loading) {
 async function loadProfile() {
   try {
     const res  = await fetch(API_URL + '/empresa/profile', {
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: { 'Authorization': 'Bearer ' + token },
+      cache: 'no-store'
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.message);
@@ -94,6 +95,16 @@ btnSalvar.addEventListener('click', async () => {
     // Atualiza header se existir
     const headerNome = document.getElementById('headerUserName');
     if (headerNome) headerNome.textContent = nome_fantasia;
+
+    // Atualiza localStorage
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    u.nome_fantasia = nome_fantasia;
+    localStorage.setItem('user', JSON.stringify(u));
+
+    if (json.data && json.data.token) {
+      token = json.data.token;
+      localStorage.setItem('token', token);
+    }
 
     showFeedback(feedbackPerfil, '✅ Dados atualizados com sucesso!', 'success');
   } catch (err) {

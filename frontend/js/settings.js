@@ -1,7 +1,7 @@
 import { API_URL } from './config.js';
 
 // ── auth ──────────────────────────────────────────────
-const token = localStorage.getItem('token');
+let token = localStorage.getItem('token');
 const role  = localStorage.getItem('user_role');
 
 if (!token || role?.toLowerCase() !== 'candidato') {
@@ -44,7 +44,8 @@ function setLoading(btn, loading) {
 async function loadProfile() {
   try {
     const res  = await fetch(API_URL + '/me', {
-      headers: { 'Authorization': 'Bearer ' + token }
+      headers: { 'Authorization': 'Bearer ' + token },
+      cache: 'no-store'
     });
     const json = await res.json();
     if (!res.ok) throw new Error(json.message);
@@ -95,6 +96,11 @@ btnSalvar.addEventListener('click', async () => {
     const u = JSON.parse(localStorage.getItem('user') || '{}');
     u.nome  = nome;
     localStorage.setItem('user', JSON.stringify(u));
+
+    if (json.data && json.data.token) {
+      token = json.data.token;
+      localStorage.setItem('token', token);
+    }
 
     // Atualiza header se existir
     const headerNome = document.getElementById('headerUserName');

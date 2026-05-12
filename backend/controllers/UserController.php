@@ -66,9 +66,32 @@ final class UserController
         );
         $stmt->execute([$nome, $telefone, $userId]);
 
+        // Get updated user data to regenerate token
+        $userModel = new User();
+        $updatedUser = $userModel->findById($userId);
+        
+        $nomeFantasia = null;
+        if (strtoupper((string)$updatedUser['role']) === 'EMPRESA' && $updatedUser['empresa_id']) {
+            require_once __DIR__ . '/../models/Company.php';
+            $companyModel = new Company();
+            $company = $companyModel->findById((int)$updatedUser['empresa_id']);
+            $nomeFantasia = $company['nome_fantasia'] ?? null;
+        }
+
+        require_once __DIR__ . '/../core/JWTService.php';
+        $token = JWTService::generate([
+            'id' => (int) $updatedUser['id'],
+            'nome' => $updatedUser['nome'],
+            'email' => $updatedUser['email'],
+            'role' => strtoupper((string) $updatedUser['role']),
+            'empresa_id' => $updatedUser['empresa_id'] ?? null,
+            'nome_fantasia' => $nomeFantasia,
+        ]);
+
         Response::success('Perfil atualizado com sucesso!', [
             'nome'     => $nome,
             'telefone' => $telefone,
+            'token'    => $token
         ]);
     }
 
