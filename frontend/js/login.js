@@ -54,6 +54,18 @@ form.addEventListener('submit', async (event) => {
 
     window.location.href = user.role === 'empresa' ? './dashboard.html' : './candidate-dashboard.html';
   } catch (error) {
+    console.log("[LOGIN ERROR HANDLER]", error);
+
+    // Trata caso de e-mail não verificado (HTTP 403)
+    if (error.status === 403 && error.payload && error.payload.data && error.payload.data.requires_verification) {
+      sessionStorage.setItem('pending_verification_email', error.payload.data.email);
+      showToast(error.message, 'warning');
+      setTimeout(() => {
+        window.location.href = './verificar-email.html?msg=unverified';
+      }, 1500);
+      return;
+    }
+
     message.textContent = error.message;
     message.classList.add('error');
     showToast(error.message, 'error');

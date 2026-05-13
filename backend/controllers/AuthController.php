@@ -73,10 +73,17 @@ final class AuthController
         try {
             $userId = $this->authService->register($nome, $email, $senha, $role, $companyData);
 
+            // Gera código de verificação
+            $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $db = Database::getConnection();
+            $stmt = $db->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
+            $stmt->execute([$userId, $code]);
+
             // Captura dados para o e-mail diferido
             $emailPayload = [
                 'email' => $email,
                 'nome' => $nome,
+                'code' => $code,
                 'role' => $role,
                 'company_email' => $companyData['email_contato'] ?? $email,
                 'nome_fantasia' => $companyData['nome_fantasia'] ?? $nome
@@ -85,25 +92,18 @@ final class AuthController
             // Etapa 2 (Assíncrona/Diferida): Envio de E-mail após a resposta
             register_shutdown_function(function() use ($emailPayload) {
                 try {
-                    if ($emailPayload['role'] === 'CANDIDATO') {
-                        ob_start();
-                        $nome = $emailPayload['nome'];
-                        include __DIR__ . '/../templates/emails/boas_vindas_candidato.php';
-                        $html = ob_get_clean();
-                        Mailer::send($emailPayload['email'], $emailPayload['nome'], 'Bem-vindo(a) ao ContrataPorto! 👋', $html);
-                    } else if ($emailPayload['role'] === 'EMPRESA') {
-                        ob_start();
-                        $nome_fantasia = $emailPayload['nome_fantasia'];
-                        include __DIR__ . '/../templates/emails/boas_vindas_empresa.php';
-                        $html = ob_get_clean();
-                        Mailer::send($emailPayload['company_email'], $emailPayload['nome_fantasia'], 'Sua empresa está no ContrataPorto! 🎉', $html);
-                    }
+                    ob_start();
+                    $nome = $emailPayload['nome'];
+                    $code = $emailPayload['code'];
+                    include __DIR__ . '/../templates/emails/verificacao_email.php';
+                    $html = ob_get_clean();
+                    Mailer::send($emailPayload['email'], $emailPayload['nome'], 'Confirme seu e-mail — ContrataPorto', $html);
                 } catch (\Exception $mailEx) {
-                    error_log("[ASYNC_MAIL_ERR] Erro no registro: " . $mailEx->getMessage());
+                    error_log("[ASYNC_MAIL_ERR] Erro no registro (verificação): " . $mailEx->getMessage());
                 }
             });
 
-            Response::json(true, "Cadastro realizado com sucesso.", ['id' => $userId], 201);
+            Response::json(true, "Cadastro realizado com sucesso. Verifique seu e-mail para confirmar a conta.", ['id' => $userId, 'requires_verification' => true], 201);
         } catch (\Exception $e) {
             Response::json(false, "Erro ao cadastrar: " . $e->getMessage(), null, 500);
         }
@@ -133,6 +133,14 @@ final class AuthController
         $auth = $this->authService->login($email, $senha);
         if (!$auth) {
             Response::json(false, "Unauthorized", null, 401);
+        }
+
+        // Verifica se o e-mail está confirmado
+        if (isset($auth['user']['email_verified']) && (int)$auth['user']['email_verified'] === 0) {
+            Response::json(false, "Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.", [
+                'requires_verification' => true,
+                'email' => $email
+            ], 403);
         }
 
         Response::json(true, "Login realizado com sucesso", [
@@ -234,5 +242,142 @@ final class AuthController
         // No backend revocation needed for stateless JWT in this step
 
         Response::json(true, "Logout realizado com sucesso", null, 200);
+    }
+
+    public function verifyEmail(): void
+    {
+        $input = Request::json();
+        $email = (string) ($input['email'] ?? '');
+        $code = (string) ($input['code'] ?? '');
+
+        if ($email === '' || $code === '') {
+            Response::json(false, "Dados insuficientes.", null, 400);
+        }
+
+        $user = $this->userModel->findByEmail($email);
+        if (!$user) {
+            Response::json(false, "Usuário não encontrado.", null, 404);
+        }
+
+        if ((int)$user['email_verified'] === 1) {
+            Response::json(true, "E-mail já verificado.", null, 200);
+        }
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare('
+            SELECT * FROM email_verifications 
+            WHERE user_id = ? AND code = ? AND used = 0 AND expires_at > NOW()
+            ORDER BY created_at DESC LIMIT 1
+        ');
+        $stmt->execute([$user['id'], $code]);
+        $verification = $stmt->fetch();
+
+        if (!$verification) {
+            Response::json(false, "Código inválido ou expirado.", null, 400);
+        }
+
+        try {
+            $db->beginTransaction();
+
+            // Marca como verificado
+            $db->prepare('UPDATE users SET email_verified = 1 WHERE id = ?')->execute([$user['id']]);
+            // Marca código como usado
+            $db->prepare('UPDATE email_verifications SET used = 1 WHERE id = ?')->execute([$verification['id']]);
+
+            $db->commit();
+
+            // Gera token para logar automaticamente
+            // Como não temos a senha aqui, vamos buscar o usuário atualizado e gerar o token manualmente
+            // ou usar o AuthService se tivermos um método apropriado.
+            // Aqui vamos buscar os dados necessários.
+            
+            $nomeFantasia = null;
+            if (strtoupper((string)$user['role']) === 'EMPRESA' && $user['empresa_id']) {
+                require_once __DIR__ . '/../models/Company.php';
+                $companyModel = new Company();
+                $company = $companyModel->findById((int)$user['empresa_id']);
+                $nomeFantasia = $company['nome_fantasia'] ?? null;
+            }
+
+            $token = JWTService::generate([
+                'id' => (int) $user['id'],
+                'nome' => $user['nome'],
+                'email' => $user['email'],
+                'role' => strtoupper((string) $user['role']),
+                'empresa_id' => $user['empresa_id'] ?? null,
+                'nome_fantasia' => $nomeFantasia,
+            ]);
+
+            Response::json(true, "E-mail verificado com sucesso!", [
+                'usuario' => [
+                    'id' => (int) $user['id'],
+                    'nome' => $user['nome'],
+                    'email' => $user['email'],
+                    'role' => strtoupper((string) $user['role']),
+                    'empresa_id' => $user['empresa_id'] ?? null,
+                    'nome_fantasia' => $nomeFantasia,
+                ],
+                'auth' => ['type' => 'bearer', 'token' => $token],
+            ], 200);
+
+        } catch (Exception $e) {
+            $db->rollBack();
+            Response::json(false, "Erro ao verificar e-mail.", null, 500);
+        }
+    }
+
+    public function resendVerification(): void
+    {
+        $input = Request::json();
+        $email = (string) ($input['email'] ?? '');
+
+        if ($email === '') {
+            Response::json(false, "E-mail é obrigatório.", null, 400);
+        }
+
+        // Rate limit para reenvio
+        $ip = Request::ip();
+        if (!RateLimiter::hit('resend_verification:' . $ip, 600, 3)) {
+            Response::json(false, "Muitas solicitações. Tente novamente em 10 minutos.", null, 429);
+        }
+
+        $user = $this->userModel->findByEmail($email);
+        if (!$user) {
+            Response::json(false, "Usuário não encontrado.", null, 404);
+        }
+
+        if ((int)$user['email_verified'] === 1) {
+            Response::json(false, "Este e-mail já está verificado.", null, 400);
+        }
+
+        $db = Database::getConnection();
+        // Invalida códigos anteriores
+        $db->prepare('UPDATE email_verifications SET used = 1 WHERE user_id = ? AND used = 0')->execute([$user['id']]);
+
+        // Gera novo código
+        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $stmt = $db->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
+        $stmt->execute([$user['id'], $code]);
+
+        $emailPayload = [
+            'email' => $email,
+            'nome' => $user['nome'],
+            'code' => $code
+        ];
+
+        register_shutdown_function(function() use ($emailPayload) {
+            try {
+                ob_start();
+                $nome = $emailPayload['nome'];
+                $code = $emailPayload['code'];
+                include __DIR__ . '/../templates/emails/verificacao_email.php';
+                $html = ob_get_clean();
+                Mailer::send($emailPayload['email'], $emailPayload['nome'], 'Seu novo código de verificação — ContrataPorto', $html);
+            } catch (\Exception $mailEx) {
+                error_log("[ASYNC_MAIL_ERR] Erro no reenvio de verificação: " . $mailEx->getMessage());
+            }
+        });
+
+        Response::json(true, "Novo código enviado para o seu e-mail.");
     }
 }

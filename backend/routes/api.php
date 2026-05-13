@@ -21,6 +21,8 @@ $router->add('POST', '/api/auth/login', fn() => $authController->login());
 $router->add('POST', '/api/auth/recover', fn() => $authController->forgotPassword());
 $router->add('POST', '/api/auth/reset', fn() => $authController->resetPassword());
 $router->add('POST', '/api/auth/logout', fn() => $authController->logout());
+$router->add('POST', '/api/auth/verify-email', fn() => $authController->verifyEmail());
+$router->add('POST', '/api/auth/resend-verification', fn() => $authController->resendVerification());
 
 $router->add('POST', '/api/empresas', fn() => $companyController->create());
 $router->add('GET', '/api/empresas/{id}', fn(array $params) => $companyController->show($params));

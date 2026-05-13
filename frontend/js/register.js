@@ -55,12 +55,16 @@ form.addEventListener('submit', async (event) => {
     const result = await withGlobalLoader(() => register(payload));
     message.textContent = result.message || 'Cadastro realizado com sucesso.';
     message.classList.add('success');
-    showToast('Cadastro realizado com sucesso.', 'success');
+    showToast(result.message || 'Verifique seu e-mail para confirmar a conta.', 'success');
+    
+    // Salva o e-mail para usar na tela de verificação
+    sessionStorage.setItem('pending_verification_email', form.email.value.trim());
+    
     form.reset();
 
     setTimeout(() => {
-      window.location.href = './login.html';
-    }, 700);
+      window.location.href = './verificar-email.html';
+    }, 1500);
   } catch (error) {
     message.textContent = error.message;
     message.classList.add('error');
