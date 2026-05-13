@@ -50,7 +50,10 @@ let timeLeft = 60;
 const startTimer = () => {
     resendLink.style.display = 'none';
     resendTimer.style.display = 'inline';
+    resendLink.classList.add('disabled');
     timeLeft = 60;
+    secondsSpan.textContent = timeLeft;
+    
     const interval = setInterval(() => {
         timeLeft--;
         secondsSpan.textContent = timeLeft;
@@ -83,6 +86,8 @@ btnVerify.addEventListener('click', async () => {
         });
 
         const json = await res.json();
+        console.log('[VERIFY_API_RESPONSE]:', json);
+        
         if (!res.ok) throw new Error(json.message || 'Erro ao verificar código.');
 
         showMessage('E-mail verificado com sucesso! Redirecionando...', 'success');
@@ -116,6 +121,8 @@ resendLink.addEventListener('click', async () => {
         });
 
         const json = await res.json();
+        console.log('[RESEND_API_RESPONSE]:', json);
+
         if (!res.ok) throw new Error(json.message);
 
         showToast('Novo código enviado com sucesso!', 'success');

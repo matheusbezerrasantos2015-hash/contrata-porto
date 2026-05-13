@@ -79,6 +79,8 @@ final class AuthController
             $stmt = $db->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
             $stmt->execute([$userId, $code]);
 
+            error_log("[EMAIL_VERIFY] Código gerado para {$email}: {$code}");
+
             // Captura dados para o e-mail diferido
             $emailPayload = [
                 'email' => $email,
@@ -358,6 +360,8 @@ final class AuthController
         $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $stmt = $db->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
         $stmt->execute([$user['id'], $code]);
+
+        error_log("[EMAIL_VERIFY] Código gerado para {$email}: {$code}");
 
         $emailPayload = [
             'email' => $email,
