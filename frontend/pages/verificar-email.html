@@ -4,126 +4,185 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifique seu e-mail | ContrataPorto</title>
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <link rel="shortcut icon" href="../assets/favicon.png">
     <link rel="stylesheet" href="../css/index.css">
     <style>
-        .verification-container {
-            max-width: 450px;
-            margin: 80px auto;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-gradient);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .verification-card {
+            background: var(--white);
+            max-width: 440px;
+            width: 90%;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             text-align: center;
         }
 
-        .logo {
-            display: inline-block;
-            margin-bottom: 10px;
+        .logo-container {
+            margin-bottom: 40px;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 10px; color: #fff; }
-        p { color: rgba(255, 255, 255, 0.7); margin-bottom: 30px; font-size: 0.95rem; }
-        #userEmail { color: #60a5fa; font-weight: 600; }
+        .logo-container img {
+            height: 72px;
+            width: auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 12px 0;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        #userEmail {
+            color: var(--primary);
+            font-weight: 600;
+        }
 
         .code-inputs {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             justify-content: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
         .code-input {
-            width: 48px;
-            height: 60px;
-            background: #fff;
-            border: 2px solid #d1d5db;
-            border-radius: 8px;
+            width: 52px;
+            height: 64px;
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #1f2937;
-            transition: all 0.3s ease;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            outline: none;
         }
 
         .code-input:focus {
-            border-color: #2563eb;
-            outline: none;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
         .btn-verify {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 12px;
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
+            transition: background 0.2s ease;
+            margin-bottom: 24px;
         }
 
         .btn-verify:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            background: var(--primary-hover);
         }
 
         .btn-verify:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
 
         .resend-container {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            color: #94a3b8;
         }
 
         .resend-link {
-            color: #60a5fa;
+            color: var(--primary);
             text-decoration: none;
             font-weight: 600;
             cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .resend-link:hover {
+            text-decoration: underline;
         }
 
         .resend-link.disabled {
-            color: rgba(255, 255, 255, 0.3);
+            color: #94a3b8;
             cursor: not-allowed;
             text-decoration: none;
         }
 
         .message {
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
+            margin-bottom: 24px;
+            font-size: 14px;
             display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .message.error { background: rgba(ef, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); display: block; }
-        .message.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); display: block; }
-
-        .loader-container { display: none; margin-bottom: 20px; }
-        .loader {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s linear infinite;
-            display: inline-block;
+        .message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+            display: flex;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .message.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #dcfce7;
+            display: flex;
+        }
+
+        @media (max-width: 480px) {
+            .verification-card {
+                padding: 32px 24px;
+            }
+            .code-inputs {
+                gap: 8px;
+            }
+            .code-input {
+                width: 44px;
+                height: 56px;
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
-<body class="dark-theme">
-    <div class="verification-container">
-        <div class="logo">
-            <img src="../assets/textlogo.png" alt="ContrataPorto" style="height: 48px; margin-bottom: 32px;">
+<body>
+    <div class="verification-card">
+        <div class="logo-container">
+            <img src="../assets/logo-contrata-porto.png" alt="ContrataPorto">
         </div>
         <h1>Verifique seu e-mail</h1>
         <p>Enviamos um código de 6 dígitos para <br><span id="userEmail">carregando...</span></p>
@@ -143,8 +202,8 @@
 
         <div class="resend-container">
             Não recebeu o código? <br>
-            <span id="resendTimer">Aguarde <span id="seconds">60</span>s para reenviar</span>
-            <a id="resendLink" class="resend-link disabled" style="display: none;">Reenviar código</a>
+            <span id="resendTimer">Reenviar em <span id="seconds">60</span>s</span>
+            <a id="resendLink" class="resend-link" style="display: none;">Reenviar código</a>
         </div>
     </div>
 
