@@ -1,4 +1,4 @@
-import API, { createJob, getJobApplications, getApplicationById, getJobs, updateApplicationStatus, updateJob, toggleJobStatus, concludeJob, deleteJob, normalizeApiResponse } from './api.js';
+import API, { API_URL, createJob, getJobApplications, getApplicationById, getJobs, updateApplicationStatus, updateJob, toggleJobStatus, concludeJob, deleteJob, normalizeApiResponse } from './api.js';
 import { getAuthState, requireAuth, isAuthenticated, redirectToLogin } from './auth.js';
 import { confirmAction, renderSkeleton, setButtonLoading, showToast, statusBadge, renderEmptyState } from './ui.js';
 import { stopFaviconPulse } from './layout.js';
@@ -13,9 +13,8 @@ const feedback = document.getElementById('feedback');
 // Drawer de Candidatos (Novo)
 const drawer = document.getElementById('candidatos-drawer');
 const overlay = document.getElementById('candidatos-overlay');
-const drawerTitle = document.getElementById('drawer-title');
-const drawerSubtitle = document.getElementById('drawer-subtitle');
-const drawerContent = document.getElementById('drawer-content');
+const drawerTitle = document.getElementById('drawer-titulo');
+const drawerContent = document.getElementById('drawer-conteudo');
 const btnFecharDrawer = document.getElementById('btn-fechar-drawer');
 
 // Modal Elements
@@ -74,70 +73,17 @@ function renderCompanyJobs(jobs) {
           <button class="btn btn-ghost" data-conclude-job="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; flex: 1;" ${isConcluded ? 'disabled' : ''}>Concluir</button>
           <button class="btn btn-ghost" data-delete-job="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; flex: 1; color: var(--color-danger);">Excluir</button>
         </div>
-        <button class="btn btn-secondary btn-block" data-job-id="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; margin-top: 4px;">Ver Candidatos</button>
+        <button class="btn btn-secondary btn-block" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; margin-top: 4px;">Ver Candidatos</button>
       </div>
     `;
     jobsContainer.appendChild(item);
   });
 }
 
-function statusBadgeDrawer(status = '') {
-  const normalized = String(status).toUpperCase();
-  const map = {
-    'PENDENTE': { label: 'Pendente', className: 'status-pendente' },
-    'ENVIADA': { label: 'Pendente', className: 'status-pendente' },
-    'EM_ANALISE': { label: 'Em análise', className: 'status-em_analise' },
-    'APROVADO': { label: 'Aprovado', className: 'status-aprovado' },
-    'APROVADA': { label: 'Aprovado', className: 'status-aprovado' },
-    'RECUSADO': { label: 'Recusado', className: 'status-recusado' },
-    'RECUSADA': { label: 'Recusado', className: 'status-recusado' }
-  };
-
-  const config = map[normalized] || { label: normalized, className: 'status-pendente' };
-  return `<span class="drawer-status-badge ${config.className}">${config.label}</span>`;
-}
-
-function renderCandidatesInDrawer(candidates) {
-  drawerContent.innerHTML = '';
-
-  if (!candidates.length) {
-    drawerContent.innerHTML = `
-      <div style="text-align: center; padding: 48px 0; color: #9ca3af;">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;"><circle cx="12" cy="12" r="10"></circle><path d="M16 12a4 4 0 0 1-8 0"></path></svg>
-        <p style="font-size: 15px; font-weight: 500; color: #374151;">Nenhum candidato ainda.</p>
-        <p style="font-size: 13px; color: #6b7280;">Aguardando as primeiras candidaturas.</p>
-      </div>
-    `;
-    return;
-  }
-
-  drawerContent.innerHTML = candidates
-    .map((item) => `
-      <article class="candidate-drawer-card">
-        <div class="candidate-drawer-info">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <h4>${escapeHTML(item.candidato_nome)}</h4>
-            ${statusBadgeDrawer(item.status)}
-          </div>
-          <p>${escapeHTML(item.candidato_email)}</p>
-        </div>
-        <div class="drawer-actions">
-          <button class="btn-drawer-action" data-view-candidate="${item.id}">
-            Ver Perfil
-          </button>
-          <button class="btn-drawer-action" data-view-resume="${item.id}" data-candidate-name="${escapeHTML(item.candidato_nome)}">
-            Ver Currículo
-          </button>
-        </div>
-      </article>
-    `)
-    .join('');
-}
-
 // Lógica do Modal de Currículo (Cloudinary)
 async function abrirModalCurriculo(applicationId, candidatoNome) {
   try {
-    const response = await withGlobalLoader(() => getApplicationById(applicationId));
+    const response = await getApplicationById(applicationId);
     const item = normalizeApiResponse(response);
 
     if (item.curriculo_url) {
@@ -162,39 +108,102 @@ function fecharModalCurriculo() {
   document.getElementById('curriculo-modal-overlay').style.display = 'none';
 }
 
-// Helpers para UI
-function withGlobalLoader(fn) {
-  return fn(); // Por enquanto apenas executa, mas mantém estrutura para possível loading global
-}
+// Lógica do Drawer de Candidatos (Refatorada)
+function abrirDrawerCandidatos(vagaId, vagaTitulo) {
+    const overlay = document.getElementById('candidatos-overlay');
+    const drawer  = document.getElementById('candidatos-drawer');
+    const titulo  = drawerTitle;
+    const conteudo = drawerContent;
 
-async function abrirDrawerCandidatos(vagaId, vagaTitulo) {
-  activeJobId = vagaId;
-  drawerTitle.textContent = `Candidatos — ${escapeHTML(vagaTitulo)}`;
-  drawerSubtitle.textContent = `Visualizando candidaturas para esta vaga.`;
-  
-  overlay.style.display = 'block';
-  drawer.classList.add('drawer-open');
-  document.body.style.overflow = 'hidden';
+    activeJobId = vagaId;
+    if (titulo) titulo.textContent = 'Candidatos — ' + vagaTitulo;
+    if (conteudo) conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Carregando...</p>';
 
-  try {
-    renderSkeleton(drawerContent, 'card', 3);
-    const response = await getJobApplications(vagaId);
-    const data = normalizeApiResponse(response);
-    renderCandidatesInDrawer(data);
-  } catch (error) {
-    showToast(error.message, 'error');
-    fecharDrawer();
-  }
+    if (overlay) overlay.style.display = 'block';
+    if (drawer) drawer.style.transform = 'translateX(0)';
+    document.body.style.overflow = 'hidden';
+
+    const token = localStorage.getItem('token');
+    fetch(`${API_URL}/jobs/${vagaId}/applications`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(r => r.json())
+    .then(response => {
+        const data = normalizeApiResponse(response);
+        const apps = Array.isArray(data) ? data : (data.items || []);
+        
+        if (!apps.length) {
+            conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Nenhum candidato ainda.</p>';
+            return;
+        }
+
+        const badges = {
+            'PENDENTE':   { bg:'#f0f0f0', color:'#555' },
+            'EM_ANALISE': { bg:'#e3f0ff', color:'#1565c0' },
+            'APROVADO':   { bg:'#e8f5e9', color:'#2e7d32' },
+            'RECUSADO':   { bg:'#fce4e4', color:'#c62828' },
+        };
+
+        conteudo.innerHTML = apps.map(app => {
+            const status = (app.status || 'PENDENTE').toUpperCase();
+            const badge = badges[status] || badges['PENDENTE'];
+            const nome = app.candidato_nome || app.name || app.nome || 'Candidato';
+            const email = app.candidato_email || app.email || '';
+            
+            return `
+            <div style="background:#f9f9f9; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <p style="margin:0; font-weight:600; color:#1a1a1a;">${escapeHTML(nome)}</p>
+                        <p style="margin:4px 0 8px; font-size:13px; color:#888;">${escapeHTML(email)}</p>
+                    </div>
+                    <span style="background:${badge.bg}; color:${badge.color};
+                                 padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;">
+                        ${status}
+                    </span>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button onclick="verPerfilCandidato(${app.id})" style="
+                        flex:1; padding:8px; background:#f0ebff; color:#6c3fc5;
+                        border:1.5px solid #d0c4f0; border-radius:8px; cursor:pointer;
+                        font-size:13px; font-weight:600;">
+                        Ver Perfil
+                    </button>
+                    <button onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')" style="
+                        flex:1; padding:8px; background:#6c3fc5; color:#fff;
+                        border:none; border-radius:8px; cursor:pointer;
+                        font-size:13px; font-weight:600;">
+                        Ver Currículo
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    })
+    .catch((err) => {
+        console.error("[DRAWER_ERR]", err);
+        conteudo.innerHTML = '<p style="color:#e53935; text-align:center; margin-top:40px;">Erro ao carregar candidatos.</p>';
+    });
 }
 
 function fecharDrawer() {
-  overlay.style.display = 'none';
-  drawer.classList.remove('drawer-open');
-  document.body.style.overflow = '';
+    const drawer = document.getElementById('candidatos-drawer');
+    const overlay = document.getElementById('candidatos-overlay');
+    if (drawer) drawer.style.transform = 'translateX(100%)';
+    if (overlay) overlay.style.display = 'none';
+    document.body.style.overflow = '';
 }
 
-btnFecharDrawer?.addEventListener('click', fecharDrawer);
-overlay?.addEventListener('click', fecharDrawer);
+// Expor para o escopo global
+window.abrirDrawerCandidatos = abrirDrawerCandidatos;
+window.fecharDrawer = fecharDrawer;
+window.verPerfilCandidato = openCandidateModal;
+window.abrirModalCurriculo = abrirModalCurriculo;
+window.fecharModalCurriculo = fecharModalCurriculo;
+
+// Listeners de UI
+document.getElementById('btn-fechar-drawer')?.addEventListener('click', fecharDrawer);
+document.getElementById('candidatos-overlay')?.addEventListener('click', fecharDrawer);
+document.getElementById('btn-fechar-modal-curriculo')?.addEventListener('click', fecharModalCurriculo);
 
 async function loadCompanyJobs() {
   if (!isAuthenticated()) { redirectToLogin(); return; }
@@ -474,10 +483,15 @@ jobsContainer?.addEventListener('click', async (event) => {
 
   const button = event.target.closest('button[data-job-id]');
   if (button) {
-    const vagaId = button.dataset.jobId;
-    const item = currentJobs.find(j => String(j.id) === String(vagaId));
-    abrirDrawerCandidatos(vagaId, item ? item.titulo : 'Vaga');
+    // Agora usando onclick direto, mas mantemos o listener vazio ou tratamos se necessário
   }
+});
+
+// Delegação para fechar modal currículo ao clicar fora (opcional se já tiver o listener acima)
+document.addEventListener('click', (event) => {
+    if (event.target.id === 'curriculo-modal-overlay') {
+        fecharModalCurriculo();
+    }
 });
 
 // Delegação para abertura de modal de candidatos (centralizada)

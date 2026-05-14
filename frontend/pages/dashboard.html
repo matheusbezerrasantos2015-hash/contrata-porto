@@ -21,8 +21,8 @@
 
     <div class="dashboard-grid">
       <section class="dashboard-main">
-        <div class="card job-publish-card">
-          <div class="card-header">
+        <div class="form-vaga-card">
+          <div class="form-vaga-card-header">
             <h2>Publicar Nova Vaga</h2>
             <p>Preencha os detalhes abaixo para encontrar o candidato ideal.</p>
           </div>
@@ -30,38 +30,38 @@
           <form id="jobForm" class="job-form">
             <!-- SEÇÃO 1: Informações Básicas -->
             <div class="form-section">
-              <div class="section-title">
-                <span class="step-number">1</span>
-                <h3>Informações Básicas</h3>
+              <div class="form-section-title">
+                <div class="form-section-number">1</div>
+                <span>INFORMAÇÕES BÁSICAS</span>
               </div>
               
               <div class="form-row">
                 <div class="form-group">
                   <label for="titulo">Título da Vaga (Público)</label>
-                  <input class="input" id="titulo" name="titulo" type="text" placeholder="Ex: Desenvolvedor Senior" required />
+                  <input id="titulo" name="titulo" type="text" placeholder="Ex: Desenvolvedor Senior" required />
                 </div>
                 <div class="form-group">
                   <label for="cargo">Cargo / Função</label>
-                  <input class="input" id="cargo" name="cargo" type="text" placeholder="Ex: Analista de Sistemas" required />
+                  <input id="cargo" name="cargo" type="text" placeholder="Ex: Analista de Sistemas" required />
                 </div>
               </div>
               
               <div class="form-group">
                 <label for="descricao">Descrição Sumária da Vaga</label>
-                <textarea class="textarea" id="descricao" name="descricao" rows="3" placeholder="Resumo das atividades principais..." required></textarea>
+                <textarea id="descricao" name="descricao" rows="3" placeholder="Resumo das atividades principais..." required></textarea>
               </div>
             </div>
 
             <!-- SEÇÃO 2: Requisitos -->
             <div class="form-section">
-              <div class="section-title">
-                <span class="step-number">2</span>
-                <h3>Requisitos & Competências</h3>
+              <div class="form-section-title">
+                <div class="form-section-number">2</div>
+                <span>REQUISITOS & COMPETÊNCIAS</span>
               </div>
               
               <div class="form-group">
                 <label for="experiencia">Nível de Experiência</label>
-                <select class="select" id="experiencia" name="experiencia">
+                <select id="experiencia" name="experiencia">
                   <option value="SEM_EXPERIENCIA">Sem Experiência / Estágio</option>
                   <option value="JUNIOR">Júnior / Operacional</option>
                   <option value="PLENO">Pleno / Especialista</option>
@@ -72,26 +72,26 @@
               <div class="form-row">
                 <div class="form-group">
                   <label for="requisitos">Requisitos Obrigatórios</label>
-                  <textarea class="textarea" id="requisitos" name="requisitos" rows="3" placeholder="Ex: CNH B, Excel avançado..."></textarea>
+                  <textarea id="requisitos" name="requisitos" rows="3" placeholder="Ex: CNH B, Excel avançado..."></textarea>
                 </div>
                 <div class="form-group">
                   <label for="diferenciais">Diferenciais (Opcional)</label>
-                  <textarea class="textarea" id="diferenciais" name="diferenciais" rows="3" placeholder="Ex: Cursos extras, Idiomas..."></textarea>
+                  <textarea id="diferenciais" name="diferenciais" rows="3" placeholder="Ex: Cursos extras, Idiomas..."></textarea>
                 </div>
               </div>
             </div>
 
             <!-- SEÇÃO 3: Condições -->
             <div class="form-section">
-              <div class="section-title">
-                <span class="step-number">3</span>
-                <h3>Condições & Benefícios</h3>
+              <div class="form-section-title">
+                <div class="form-section-number">3</div>
+                <span>CONDIÇÕES & BENEFÍCIOS</span>
               </div>
               
               <div class="form-row">
                 <div class="form-group">
                   <label for="tipo_vaga">Modalidade de Trabalho</label>
-                  <select class="select" id="tipo_vaga" name="tipo_vaga">
+                  <select id="tipo_vaga" name="tipo_vaga">
                     <option value="PRESENCIAL">Presencial</option>
                     <option value="REMOTO">Remoto</option>
                     <option value="HIBRIDO">Híbrido</option>
@@ -99,7 +99,7 @@
                 </div>
                 <div class="form-group">
                   <label for="tipo_contrato">Tipo de Contrato</label>
-                  <select class="select" id="tipo_contrato" name="tipo_contrato" required>
+                  <select id="tipo_contrato" name="tipo_contrato" required>
                     <option value="CLT">CLT</option>
                     <option value="PJ">PJ</option>
                     <option value="TEMPORARIO">Temporário</option>
@@ -111,32 +111,29 @@
               
               <div class="form-group">
                 <label for="carga_horaria">Carga Horária / Escala</label>
-                <input class="input" id="carga_horaria" name="carga_horaria" type="text" placeholder="Ex: 44h semanais, 12x36..." />
+                <input id="carga_horaria" name="carga_horaria" type="text" placeholder="Ex: 44h semanais, 12x36..." />
               </div>
               
               <div class="form-row">
                 <div class="form-group">
                   <label for="salario_min">Salário Mínimo (R$)</label>
-                  <input class="input" id="salario_min" name="salario_min" type="number" step="0.01" placeholder="Vazio para combinar" />
+                  <input id="salario_min" name="salario_min" type="number" step="0.01" placeholder="Vazio para combinar" />
                 </div>
                 <div class="form-group">
                   <label for="salario_max">Salário Máximo (R$)</label>
-                  <input class="input" id="salario_max" name="salario_max" type="number" step="0.01" placeholder="Opcional" />
+                  <input id="salario_max" name="salario_max" type="number" step="0.01" placeholder="Opcional" />
                 </div>
               </div>
               
               <div class="form-group">
                 <label for="beneficios">Benefícios Oferecidos</label>
-                <textarea class="textarea" id="beneficios" name="beneficios" rows="2" placeholder="Ex: VT, VR, Plano de saúde..."></textarea>
+                <textarea id="beneficios" name="beneficios" rows="2" placeholder="Ex: VT, VR, Plano de saúde..."></textarea>
               </div>
             </div>
 
-            <div class="form-actions">
-              <button class="btn-publish" type="submit">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                Publicar Vaga Agora
-              </button>
-            </div>
+            <button class="btn-publicar-vaga" type="submit">
+              Publicar Vaga Agora
+            </button>
           </form>
           <p id="feedback" class="message"></p>
         </div>
@@ -154,21 +151,15 @@
     </div>
   </main>
 
-  <!-- Drawer de Candidatos (Novo) -->
-  <div id="candidatos-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(2px);"></div>
-  <div id="candidatos-drawer" class="candidatos-drawer">
-    <div class="drawer-header">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <h2 id="drawer-title" style="font-size: 18px; font-weight: 800; color: #1a1a1a; margin: 0;">Candidatos</h2>
-        <button id="btn-fechar-drawer" style="background: #f4f4f5; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #71717a; transition: all 0.2s;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-      <p id="drawer-subtitle" style="font-size: 13px; color: #71717a; margin-top: 4px;"></p>
+  <!-- Drawer de Candidatos -->
+  <div id="candidatos-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1000; backdrop-filter:blur(2px);"></div>
+
+  <div id="candidatos-drawer" style="position:fixed; top:0; right:0; width:420px; height:100vh; background:#fff; z-index:1001; overflow-y:auto; padding:32px 24px; transform:translateX(100%); transition:transform 0.3s ease; box-shadow:-4px 0 24px rgba(0,0,0,0.12);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h3 id="drawer-titulo" style="margin:0; font-size:18px; color:#1a1a1a; font-weight:800;">Candidatos</h3>
+      <button id="btn-fechar-drawer" style="background:none; border:none; font-size:22px; cursor:pointer; color:#888; line-height:1;">✕</button>
     </div>
-    <div id="drawer-content" class="drawer-content">
-      <!-- Injetado por dashboard.js -->
-    </div>
+    <div id="drawer-conteudo"></div>
   </div>
 
   <!-- Modal de Edição de Vaga -->
