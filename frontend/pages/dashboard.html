@@ -242,6 +242,20 @@
     </div>
   </div>
 
+  <div id="candidatos-overlay" style="display:none; position:fixed; inset:0;
+       background:rgba(0,0,0,0.4); z-index:1000;"></div>
+
+  <div id="candidatos-drawer" style="position:fixed; top:0; right:0; width:420px;
+       height:100vh; background:#fff; z-index:1001; overflow-y:auto; padding:32px 24px;
+       transform:translateX(100%); transition:transform 0.3s ease; box-shadow:-4px 0 24px rgba(0,0,0,0.12);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h3 id="drawer-titulo" style="margin:0; font-size:18px; color:#1a1a1a;">Candidatos</h3>
+      <button id="btn-fechar-drawer" style="background:none; border:none; font-size:22px;
+              cursor:pointer; color:#888; line-height:1;">✕</button>
+    </div>
+    <div id="drawer-conteudo"></div>
+  </div>
+
   <div id="appFooter"></div>
   <script type="module" src="../js/layout.js"></script>
   <script type="module" src="../js/dashboard.js"></script>

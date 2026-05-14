@@ -71,7 +71,7 @@ function renderCompanyJobs(jobs) {
         </button>
       </div>
 
-      <button class="btn btn-primary btn-block btn-sm" style="margin-top: var(--space-2);" onclick="loadCandidates(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
+      <button class="btn btn-primary btn-block btn-sm" style="margin-top: var(--space-2);" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
         Ver Candidatos (${job.applications_count || 0})
       </button>
     `;
@@ -79,48 +79,85 @@ function renderCompanyJobs(jobs) {
   });
 }
 
-async function loadCandidates(jobId, jobTitle) {
-  if (!candidatesContainer) return;
-  
-  activeJobId = jobId;
-  renderSkeleton(candidatesContainer, 'card', 3);
-  
-  try {
-    const response = await getJobApplications(jobId);
-    const data = normalizeApiResponse(response);
-    const apps = Array.isArray(data) ? data : (data.items || []);
-    
-    candidatesContainer.innerHTML = '';
-    
-    if (!apps.length) {
-      renderEmptyState(candidatesContainer, {
-        title: 'Nenhum candidato',
-        message: `Ainda não há inscritos para a vaga: ${jobTitle}`
-      });
-      return;
-    }
+function abrirDrawerCandidatos(vagaId, vagaTitulo) {
+    const overlay = document.getElementById('candidatos-overlay');
+    const drawer  = document.getElementById('candidatos-drawer');
+    const titulo  = document.getElementById('drawer-titulo');
+    const conteudo = document.getElementById('drawer-conteudo');
 
-    apps.forEach(app => {
-      const nome = app.candidato_nome || 'Candidato';
-      const card = document.createElement('div');
-      card.className = 'candidate-card';
-      card.innerHTML = `
-        <div class="candidate-info">
-          <h4>${escapeHTML(nome)}</h4>
-          <p>${escapeHTML(app.candidato_email)} • Inscrito em ${new Date(app.created_at).toLocaleDateString()}</p>
-          <div style="margin-top: 4px;">${statusBadge(app.status)}</div>
-        </div>
-        <div style="display: flex; gap: var(--space-2);">
-          <button class="btn btn-secondary btn-sm" onclick="openCandidateModal(${app.id})">Ver Perfil</button>
-          <button class="btn btn-primary btn-sm" onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')">Currículo</button>
-        </div>
-      `;
-      candidatesContainer.appendChild(card);
+    activeJobId = vagaId;
+    if (titulo) titulo.textContent = 'Candidatos — ' + vagaTitulo;
+    if (conteudo) conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Carregando...</p>';
+
+    if (overlay) overlay.style.display = 'block';
+    if (drawer) drawer.style.transform = 'translateX(0)';
+
+    const token = localStorage.getItem('token');
+    fetch(`${API_URL}/jobs/${vagaId}/applications`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(r => r.json())
+    .then(response => {
+        const data = normalizeApiResponse(response);
+        const apps = Array.isArray(data) ? data : (data.items || []);
+        
+        if (!apps.length) {
+            conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Nenhum candidato ainda.</p>';
+            return;
+        }
+
+        const badges = {
+            'PENDENTE':   { bg:'#f0f0f0', color:'#555' },
+            'EM_ANALISE': { bg:'#e3f0ff', color:'#1565c0' },
+            'APROVADO':   { bg:'#e8f5e9', color:'#2e7d32' },
+            'RECUSADO':   { bg:'#fce4e4', color:'#c62828' },
+        };
+
+        conteudo.innerHTML = apps.map(app => {
+            const status = (app.status || 'PENDENTE').toUpperCase();
+            const badge = badges[status] || badges['PENDENTE'];
+            const nome = app.candidato_nome || app.name || app.nome || 'Candidato';
+            
+            return `
+            <div style="background:#f9f9f9; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <p style="margin:0; font-weight:600; color:#1a1a1a;">${escapeHTML(nome)}</p>
+                        <p style="margin:4px 0 8px; font-size:13px; color:#888;">${escapeHTML(app.candidato_email || '')}</p>
+                    </div>
+                    <span style="background:${badge.bg}; color:${badge.color};
+                                 padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;">
+                        ${status}
+                    </span>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button onclick="verPerfilCandidato(${app.id})" style="
+                        flex:1; padding:8px; background:#f0ebff; color:#6c3fc5;
+                        border:1.5px solid #d0c4f0; border-radius:8px; cursor:pointer;
+                        font-size:13px; font-weight:600;">
+                        Ver Perfil
+                    </button>
+                    <button onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')" style="
+                        flex:1; padding:8px; background:#6c3fc5; color:#fff;
+                        border:none; border-radius:8px; cursor:pointer;
+                        font-size:13px; font-weight:600;">
+                        Ver Currículo
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    })
+    .catch((err) => {
+        console.error("[DRAWER_ERR]", err);
+        conteudo.innerHTML = '<p style="color:#e53935; text-align:center; margin-top:40px;">Erro ao carregar candidatos.</p>';
     });
-  } catch (error) {
-    showToast('Erro ao carregar candidatos: ' + error.message, 'error');
-    candidatesContainer.innerHTML = '<p class="text-error">Falha ao carregar candidatos.</p>';
-  }
+}
+
+function fecharDrawer() {
+    const drawer = document.getElementById('candidatos-drawer');
+    const overlay = document.getElementById('candidatos-overlay');
+    if (drawer) drawer.style.transform = 'translateX(100%)';
+    if (overlay) overlay.style.display = 'none';
 }
 
 // Lógica do Modal de Currículo
@@ -152,12 +189,17 @@ function fecharModalCurriculo() {
 }
 
 // Expor para o escopo global
-window.loadCandidates = loadCandidates;
-window.openCandidateModal = openCandidateModal;
+window.abrirDrawerCandidatos = abrirDrawerCandidatos;
+window.fecharDrawer = fecharDrawer;
+window.verPerfilCandidato = openCandidateModal;
 window.abrirModalCurriculo = abrirModalCurriculo;
 window.fecharModalCurriculo = fecharModalCurriculo;
 
 // Listeners de UI
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('btn-fechar-drawer')?.addEventListener('click', fecharDrawer);
+    document.getElementById('candidatos-overlay')?.addEventListener('click', fecharDrawer);
+});
 document.getElementById('btn-fechar-modal-curriculo')?.addEventListener('click', fecharModalCurriculo);
 
 async function loadCompanyJobs() {
@@ -493,10 +535,10 @@ candidateModalContent?.addEventListener('click', async (event) => {
     // Refresh modal content to show new status
     await openCandidateModal(id);
 
-      // Refresh underlying list 
+      // Refresh underlying list (drawer)
       if (activeJobId) {
         const job = currentJobs.find(j => j.id === activeJobId);
-        loadCandidates(activeJobId, job ? job.titulo : 'Vaga');
+        abrirDrawerCandidatos(activeJobId, job ? job.titulo : 'Vaga');
       }
   } catch (error) {
     showToast(error.message, 'error');
