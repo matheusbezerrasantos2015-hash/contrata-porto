@@ -53,41 +53,38 @@ function renderCompanyJobs(jobs) {
 
   jobs.forEach((job) => {
     const item = document.createElement('div');
-    item.className = 'sidebar-vaga-item';
+    item.className = 'job-card-sidebar';
     const isPaused = job.status === 'PAUSADA';
     const isConcluded = job.status === 'CONCLUIDA';
     const statusText = isPaused ? 'Ativar' : 'Pausar';
     
     item.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+      <div class="job-card-header">
         <div>
-          <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b;">${escapeHTML(job.titulo)}</h4>
-          <p style="margin: 4px 0 0; font-size: 12px; color: #64748b;">${escapeHTML(job.cargo)} • ${escapeHTML(job.tipo_contrato)}</p>
+          <h4>${escapeHTML(job.titulo)}</h4>
+          <p class="job-card-meta">${escapeHTML(job.cargo)} • ${escapeHTML(job.tipo_contrato)}</p>
         </div>
         ${statusBadge(job.status)}
       </div>
       
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
-        <button class="btn-sidebar-action" data-edit-job="${job.id}" title="Editar Vaga">
-          <i class="fa-solid fa-pen-to-square"></i> Editar
+      <div class="job-card-actions">
+        <button class="action-btn" data-edit-job="${job.id}" title="Editar Vaga">
+          <i class="fa-solid fa-pen"></i>
         </button>
-        <button class="btn-sidebar-action" data-toggle-job="${job.id}" title="${statusText} Vaga" ${isConcluded ? 'disabled' : ''}>
-          <i class="fa-solid ${isPaused ? 'fa-play' : 'fa-pause'}"></i> ${statusText}
+        <button class="action-btn" data-toggle-job="${job.id}" title="${statusText} Vaga" ${isConcluded ? 'disabled' : ''}>
+          <i class="fa-solid ${isPaused ? 'fa-play' : 'fa-pause'}"></i>
         </button>
-        <button class="btn-sidebar-action" data-conclude-job="${job.id}" title="Concluir Vaga" ${isConcluded ? 'disabled' : ''}>
-          <i class="fa-solid fa-check-circle"></i> Concluir
+        <button class="action-btn" data-conclude-job="${job.id}" title="Concluir Vaga" ${isConcluded ? 'disabled' : ''}>
+          <i class="fa-solid fa-check-circle"></i>
         </button>
-        <button class="btn-sidebar-action" data-delete-job="${job.id}" title="Excluir Vaga" style="color: #ef4444;">
-          <i class="fa-solid fa-trash"></i> Excluir
+        <button class="action-btn danger" data-delete-job="${job.id}" title="Excluir Vaga">
+          <i class="fa-solid fa-trash"></i>
         </button>
       </div>
 
-      <button class="btn-sidebar-main" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
+      <button class="view-candidates-btn" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
         <i class="fa-solid fa-users"></i>
-        Ver Candidatos
-        <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 20px; margin-left: auto; font-size: 11px;">
-          ${job.applications_count || 0}
-        </span>
+        <span>Ver Candidatos (${job.applications_count || 0})</span>
       </button>
     `;
     jobsContainer.appendChild(item);
@@ -165,28 +162,21 @@ function abrirDrawerCandidatos(vagaId, vagaTitulo) {
             const email = app.candidato_email || app.email || '';
             
             return `
-            <div style="background:#f9f9f9; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #eee;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <p style="margin:0; font-weight:600; color:#1a1a1a;">${escapeHTML(nome)}</p>
-                        <p style="margin:4px 0 8px; font-size:13px; color:#888;">${escapeHTML(email)}</p>
+            <div class="candidate-card-drawer">
+                <div class="candidate-card-header">
+                    <div class="candidate-meta">
+                        <p class="candidate-name">${escapeHTML(nome)}</p>
+                        <p class="candidate-email">${escapeHTML(email)}</p>
                     </div>
-                    <span style="background:${badge.bg}; color:${badge.color};
-                                 padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;">
+                    <span class="status-badge" style="background:${badge.bg}; color:${badge.color};">
                         ${status}
                     </span>
                 </div>
-                <div style="display:flex; gap:8px; margin-top:8px;">
-                    <button onclick="verPerfilCandidato(${app.id})" style="
-                        flex:1; padding:8px; background:#f0ebff; color:#6c3fc5;
-                        border:1.5px solid #d0c4f0; border-radius:8px; cursor:pointer;
-                        font-size:13px; font-weight:600;">
+                <div class="candidate-card-actions">
+                    <button onclick="verPerfilCandidato(${app.id})" class="btn btn-secondary btn-sm">
                         Ver Perfil
                     </button>
-                    <button onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')" style="
-                        flex:1; padding:8px; background:#6c3fc5; color:#fff;
-                        border:none; border-radius:8px; cursor:pointer;
-                        font-size:13px; font-weight:600;">
+                    <button onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')" class="btn btn-primary btn-sm">
                         Ver Currículo
                     </button>
                 </div>

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 :root {
   /* Brand - ContrataPorto Premium Indigo */
   --brand-50: #f5f7ff;
@@ -9,13 +11,13 @@
   --brand-800: #2e2a86;
 
   /* Premium Dashboard Tokens */
-  --brand-primary: #6c3fc5;
-  --brand-dark: #4f2da3;
-  --bg-light: #f8fafc;
-  --text-main: #1e293b;
+  --brand-primary: #1e3a8a; /* Royal Blue */
+  --brand-dark: #1e3a8a;
+  --bg-light: #f8f9fc;
+  --text-main: #0f172a;
   --text-muted: #64748b;
-  --radius-premium: 20px;
-  --shadow-premium: 0 10px 40px rgba(0,0,0,0.04);
+  --radius-premium: 12px;
+  --shadow-premium: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
 
   /* Neutrals - Slate Premium */
   --slate-50: #f8fafc;
@@ -82,7 +84,7 @@
 html, body { margin: 0; padding: 0; }
 
 body {
-  font-family: Inter, "Segoe UI", Roboto, -apple-system, system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;

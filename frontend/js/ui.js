@@ -62,12 +62,10 @@ export function showToast(message, type = 'info') {
     info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
   };
 
-  // Ícones são literais HTML estáticos (sem dados do usuário)
   item.innerHTML = `
     <span class="toast-icon">${icons[type] || icons.info}</span>
     <span class="toast-message"></span>
   `;
-  // Mensagem inserida via textContent para prevenir XSS
   item.querySelector('.toast-message').textContent = message;
 
   toastRoot.appendChild(item);
@@ -103,10 +101,10 @@ export function renderSkeleton(container, type = 'card', count = 3) {
     html = logoLoader + Array.from({ length: count }).map(() => '<div class="skeleton-card"></div>').join('');
   } else if (type === 'detail') {
     html = `
-      <div class="skeleton" style="height: 40px; width: 60%; margin-bottom: 12px;"></div>
-      <div class="skeleton" style="height: 24px; width: 40%; margin-bottom: 24px;"></div>
-      <div class="skeleton" style="height: 100px; width: 100%; margin-bottom: 12px;"></div>
-      <div class="skeleton" style="height: 100px; width: 100%;"></div>
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line subtitle"></div>
+      <div class="skeleton-box"></div>
+      <div class="skeleton-box"></div>
     `;
   }
   container.innerHTML = html;
@@ -119,7 +117,6 @@ export function confirmAction(message) {
 export function renderEmptyState(container, { title, message, ctaText, ctaHref, ctaId }) {
   if (!container) return;
 
-  // Estrutura estática — dados dinâmicos inseridos via textContent (sem risco de XSS)
   const wrapper = document.createElement('div');
   wrapper.className = 'empty-state';
 
@@ -141,9 +138,8 @@ export function renderEmptyState(container, { title, message, ctaText, ctaHref, 
 
   if (ctaText && ctaHref) {
     const a = document.createElement('a');
-    a.href = ctaHref;           // href é sempre URL interna controlada pelo código
-    a.className = 'btn btn-primary';
-    a.style.marginTop = '1rem';
+    a.href = ctaHref;
+    a.className = 'btn btn-primary btn-cta';
     a.textContent = ctaText;
     wrapper.appendChild(a);
   }
@@ -151,8 +147,7 @@ export function renderEmptyState(container, { title, message, ctaText, ctaHref, 
   if (ctaText && ctaId) {
     const btn = document.createElement('button');
     btn.id = ctaId;
-    btn.className = 'btn btn-primary';
-    btn.style.marginTop = '1rem';
+    btn.className = 'btn btn-primary btn-cta';
     btn.textContent = ctaText;
     wrapper.appendChild(btn);
   }
