@@ -8,18 +8,42 @@
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <meta name="theme-color" content="#4f46e5">
 </head>
 <body>
   <div id="appHeader"></div>
 
   <main class="app-main">
-    <header class="page-header" style="margin-bottom: var(--space-4);">
-      <h1 style="font-size: var(--font-2xl); font-weight: 800;">Painel de Recrutamento</h1>
-      <p style="color: var(--slate-500);">Gerencie suas vagas e selecione os melhores talentos.</p>
-    </header>
-
     <div class="dashboard-grid">
+      <!-- Barra de Navegação Lateral -->
+      <aside class="dashboard-nav">
+        <div style="padding: 0 16px 24px; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+          <h2 style="font-size: 18px; font-weight: 800; color: #1e293b;">Recrutador</h2>
+          <p style="font-size: 12px; color: #64748b; margin: 4px 0 0;">Painel de Controle</p>
+        </div>
+        <a href="#" class="nav-item active">
+          <i class="fa-solid fa-plus"></i>
+          Publicar Vaga
+        </a>
+        <a href="#vagas" class="nav-item">
+          <i class="fa-solid fa-briefcase"></i>
+          Suas Vagas
+        </a>
+        <a href="#candidatos" class="nav-item">
+          <i class="fa-solid fa-users"></i>
+          Candidatos
+        </a>
+        <a href="settings-empresa.html" class="nav-item">
+          <i class="fa-solid fa-gear"></i>
+          Configurações
+        </a>
+        <div style="margin-top: 32px; padding: 16px; background: #f8fafc; border-radius: 12px; font-size: 13px; color: #64748b;">
+          <p style="margin: 0; font-weight: 700; color: #1e293b;">Precisa de ajuda?</p>
+          <p style="margin: 4px 0 0;">Fale com nosso suporte especializado em RH.</p>
+        </div>
+      </aside>
+
       <section class="dashboard-main">
         <div class="form-vaga-card">
           <div class="form-vaga-card-header">
@@ -132,17 +156,20 @@
             </div>
 
             <button class="btn-publicar-vaga" type="submit">
+              <i class="fa-solid fa-rocket"></i>
               Publicar Vaga Agora
             </button>
           </form>
-          <p id="feedback" class="message"></p>
+          <p id="feedback" class="message" style="margin: 0 32px 24px;"></p>
         </div>
-
       </section>
 
-      <aside class="dashboard-sidebar">
-        <div class="card">
-          <h3 style="font-size: var(--font-md); margin-bottom: var(--space-2);">Suas Vagas Ativas</h3>
+      <aside class="dashboard-sidebar" id="vagas">
+        <div class="card" style="position: sticky; top: 96px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <i class="fa-solid fa-list-check" style="color: #6c3fc5; font-size: 18px;"></i>
+            <h3 style="font-size: 16px; margin: 0; font-weight: 700; color: #1e293b;">Suas Vagas Ativas</h3>
+          </div>
           <div id="companyJobs" class="sidebar-vagas">
             <!-- Injetado por dashboard.js -->
           </div>
