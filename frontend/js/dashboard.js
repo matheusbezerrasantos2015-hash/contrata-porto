@@ -7,15 +7,9 @@ import { escapeHTML } from './utils.js';
 requireAuth({ role: 'empresa' });
 
 const jobsContainer = document.getElementById('companyJobs');
+const candidatesContainer = document.getElementById('candidates');
 const jobForm = document.getElementById('jobForm');
 const feedback = document.getElementById('feedback');
-
-// Drawer de Candidatos (Novo)
-const drawer = document.getElementById('candidatos-drawer');
-const overlay = document.getElementById('candidatos-overlay');
-const drawerTitle = document.getElementById('drawer-titulo');
-const drawerContent = document.getElementById('drawer-conteudo');
-const btnFecharDrawer = document.getElementById('btn-fechar-drawer');
 
 // Modal Elements
 const editModal = document.getElementById('editJobModal');
@@ -37,61 +31,99 @@ function setFeedback(message, type = '') {
 function renderCompanyJobs(jobs) {
   jobsContainer.innerHTML = '';
 
-  // Atualizar Stats
-  document.getElementById('stat-vagas-ativas').textContent = jobs.filter(j => j.status === 'ATIVA').length;
-  document.getElementById('stat-total-candidatos').textContent = jobs.reduce((acc, curr) => acc + (parseInt(curr.applications_count) || 0), 0);
-  document.getElementById('stat-novas-inscricoes').textContent = jobs.length; // Exemplo simplificado
-
   if (!jobs.length) {
     renderEmptyState(jobsContainer, {
-      icon: '<i class="fa-solid fa-folder-open" style="font-size: 32px; color: #cbd5e1;"></i>',
+      icon: '<i class="fa-solid fa-folder-open"></i>',
       title: 'Sem vagas',
-      message: 'Você ainda não publicou nenhuma vaga.'
+      message: 'Publique sua primeira vaga.'
     });
     return;
   }
 
   jobs.forEach((job) => {
     const item = document.createElement('div');
-    item.className = 'job-card-sidebar';
+    item.className = 'sidebar-vaga-item';
     const isPaused = job.status === 'PAUSADA';
     const isConcluded = job.status === 'CONCLUIDA';
     const statusText = isPaused ? 'Ativar' : 'Pausar';
     
     item.innerHTML = `
-      <div class="job-card-header">
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-2);">
         <div>
-          <h4>${escapeHTML(job.titulo)}</h4>
-          <p class="job-card-meta">${escapeHTML(job.cargo)} • ${escapeHTML(job.tipo_contrato)}</p>
+          <strong style="display: block; font-size: var(--font-sm);">${escapeHTML(job.titulo)}</strong>
+          <span style="font-size: var(--font-xs); color: var(--slate-500);">${escapeHTML(job.cargo)}</span>
         </div>
         ${statusBadge(job.status)}
       </div>
       
-      <div class="job-card-actions">
-        <button class="action-btn" data-edit-job="${job.id}" title="Editar Vaga">
+      <div style="display: flex; gap: var(--space-1); margin-top: var(--space-2);">
+        <button class="btn btn-ghost btn-sm" data-edit-job="${job.id}" title="Editar">
           <i class="fa-solid fa-pen"></i>
         </button>
-        <button class="action-btn" data-toggle-job="${job.id}" title="${statusText} Vaga" ${isConcluded ? 'disabled' : ''}>
+        <button class="btn btn-ghost btn-sm" data-toggle-job="${job.id}" title="${statusText}" ${isConcluded ? 'disabled' : ''}>
           <i class="fa-solid ${isPaused ? 'fa-play' : 'fa-pause'}"></i>
         </button>
-        <button class="action-btn" data-conclude-job="${job.id}" title="Concluir Vaga" ${isConcluded ? 'disabled' : ''}>
-          <i class="fa-solid fa-check-circle"></i>
+        <button class="btn btn-ghost btn-sm" data-conclude-job="${job.id}" title="Concluir" ${isConcluded ? 'disabled' : ''}>
+          <i class="fa-solid fa-check"></i>
         </button>
-        <button class="action-btn danger" data-delete-job="${job.id}" title="Excluir Vaga">
+        <button class="btn btn-ghost btn-sm" data-delete-job="${job.id}" title="Excluir" style="color: var(--color-danger);">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
 
-      <button class="view-candidates-btn" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
-        <i class="fa-solid fa-users"></i>
-        <span>Ver Candidatos (${job.applications_count || 0})</span>
+      <button class="btn btn-primary btn-block btn-sm" style="margin-top: var(--space-2);" onclick="loadCandidates(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
+        Ver Candidatos (${job.applications_count || 0})
       </button>
     `;
     jobsContainer.appendChild(item);
   });
 }
 
-// Lógica do Modal de Currículo (Cloudinary)
+async function loadCandidates(jobId, jobTitle) {
+  if (!candidatesContainer) return;
+  
+  activeJobId = jobId;
+  renderSkeleton(candidatesContainer, 'card', 3);
+  
+  try {
+    const response = await getJobApplications(jobId);
+    const data = normalizeApiResponse(response);
+    const apps = Array.isArray(data) ? data : (data.items || []);
+    
+    candidatesContainer.innerHTML = '';
+    
+    if (!apps.length) {
+      renderEmptyState(candidatesContainer, {
+        title: 'Nenhum candidato',
+        message: `Ainda não há inscritos para a vaga: ${jobTitle}`
+      });
+      return;
+    }
+
+    apps.forEach(app => {
+      const nome = app.candidato_nome || 'Candidato';
+      const card = document.createElement('div');
+      card.className = 'candidate-card';
+      card.innerHTML = `
+        <div class="candidate-info">
+          <h4>${escapeHTML(nome)}</h4>
+          <p>${escapeHTML(app.candidato_email)} • Inscrito em ${new Date(app.created_at).toLocaleDateString()}</p>
+          <div style="margin-top: 4px;">${statusBadge(app.status)}</div>
+        </div>
+        <div style="display: flex; gap: var(--space-2);">
+          <button class="btn btn-secondary btn-sm" onclick="openCandidateModal(${app.id})">Ver Perfil</button>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')">Currículo</button>
+        </div>
+      `;
+      candidatesContainer.appendChild(card);
+    });
+  } catch (error) {
+    showToast('Erro ao carregar candidatos: ' + error.message, 'error');
+    candidatesContainer.innerHTML = '<p class="text-error">Falha ao carregar candidatos.</p>';
+  }
+}
+
+// Lógica do Modal de Currículo
 async function abrirModalCurriculo(applicationId, candidatoNome) {
   try {
     const response = await getApplicationById(applicationId);
@@ -103,7 +135,6 @@ async function abrirModalCurriculo(applicationId, candidatoNome) {
       const btnBaixar = document.getElementById('btn-baixar-curriculo');
       
       btnVer.href = item.curriculo_url;
-      // fl_attachment=true força o Cloudinary a enviar Content-Disposition: attachment
       btnBaixar.href = item.curriculo_url + (item.curriculo_url.includes('?') ? '&' : '?') + 'fl_attachment=true';
       
       document.getElementById('curriculo-modal-overlay').style.display = 'flex';
@@ -116,97 +147,17 @@ async function abrirModalCurriculo(applicationId, candidatoNome) {
 }
 
 function fecharModalCurriculo() {
-  document.getElementById('curriculo-modal-overlay').style.display = 'none';
-}
-
-// Lógica do Drawer de Candidatos (Refatorada)
-function abrirDrawerCandidatos(vagaId, vagaTitulo) {
-    const overlay = document.getElementById('candidatos-overlay');
-    const drawer  = document.getElementById('candidatos-drawer');
-    const titulo  = drawerTitle;
-    const conteudo = drawerContent;
-
-    activeJobId = vagaId;
-    if (titulo) titulo.textContent = 'Candidatos — ' + vagaTitulo;
-    if (conteudo) conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Carregando...</p>';
-
-    if (overlay) overlay.style.display = 'block';
-    if (drawer) drawer.style.transform = 'translateX(0)';
-    document.body.style.overflow = 'hidden';
-
-    const token = localStorage.getItem('token');
-    fetch(`${API_URL}/jobs/${vagaId}/applications`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(r => r.json())
-    .then(response => {
-        const data = normalizeApiResponse(response);
-        const apps = Array.isArray(data) ? data : (data.items || []);
-        
-        if (!apps.length) {
-            conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Nenhum candidato ainda.</p>';
-            return;
-        }
-
-        const badges = {
-            'PENDENTE':   { bg:'#f0f0f0', color:'#555' },
-            'EM_ANALISE': { bg:'#e3f0ff', color:'#1565c0' },
-            'APROVADO':   { bg:'#e8f5e9', color:'#2e7d32' },
-            'RECUSADO':   { bg:'#fce4e4', color:'#c62828' },
-        };
-
-        conteudo.innerHTML = apps.map(app => {
-            const status = (app.status || 'PENDENTE').toUpperCase();
-            const badge = badges[status] || badges['PENDENTE'];
-            const nome = app.candidato_nome || app.name || app.nome || 'Candidato';
-            const email = app.candidato_email || app.email || '';
-            
-            return `
-            <div class="candidate-card-drawer">
-                <div class="candidate-card-header">
-                    <div class="candidate-meta">
-                        <p class="candidate-name">${escapeHTML(nome)}</p>
-                        <p class="candidate-email">${escapeHTML(email)}</p>
-                    </div>
-                    <span class="status-badge" style="background:${badge.bg}; color:${badge.color};">
-                        ${status}
-                    </span>
-                </div>
-                <div class="candidate-card-actions">
-                    <button onclick="verPerfilCandidato(${app.id})" class="btn btn-secondary btn-sm">
-                        Ver Perfil
-                    </button>
-                    <button onclick="abrirModalCurriculo(${app.id}, '${nome.replace(/'/g, "\\'")}')" class="btn btn-primary btn-sm">
-                        Ver Currículo
-                    </button>
-                </div>
-            </div>`;
-        }).join('');
-    })
-    .catch((err) => {
-        console.error("[DRAWER_ERR]", err);
-        conteudo.innerHTML = '<p style="color:#e53935; text-align:center; margin-top:40px;">Erro ao carregar candidatos.</p>';
-    });
-}
-
-function fecharDrawer() {
-    const drawer = document.getElementById('candidatos-drawer');
-    const overlay = document.getElementById('candidatos-overlay');
-    if (drawer) drawer.style.transform = 'translateX(100%)';
-    if (overlay) overlay.style.display = 'none';
-    document.body.style.overflow = '';
+  const modal = document.getElementById('curriculo-modal-overlay');
+  if (modal) modal.style.display = 'none';
 }
 
 // Expor para o escopo global
-window.abrirDrawerCandidatos = abrirDrawerCandidatos;
-window.fecharDrawer = fecharDrawer;
-window.verPerfilCandidato = openCandidateModal;
+window.loadCandidates = loadCandidates;
+window.openCandidateModal = openCandidateModal;
 window.abrirModalCurriculo = abrirModalCurriculo;
 window.fecharModalCurriculo = fecharModalCurriculo;
 
 // Listeners de UI
-document.getElementById('btn-fechar-drawer')?.addEventListener('click', fecharDrawer);
-document.getElementById('candidatos-overlay')?.addEventListener('click', fecharDrawer);
 document.getElementById('btn-fechar-modal-curriculo')?.addEventListener('click', fecharModalCurriculo);
 
 async function loadCompanyJobs() {
@@ -542,12 +493,11 @@ candidateModalContent?.addEventListener('click', async (event) => {
     // Refresh modal content to show new status
     await openCandidateModal(id);
 
-    // Refresh underlying list 
-    if (activeJobId) {
-      const resp = await getJobApplications(activeJobId);
-      const candData = normalizeApiResponse(resp);
-      renderCandidatesInDrawer(candData);
-    }
+      // Refresh underlying list 
+      if (activeJobId) {
+        const job = currentJobs.find(j => j.id === activeJobId);
+        loadCandidates(activeJobId, job ? job.titulo : 'Vaga');
+      }
   } catch (error) {
     showToast(error.message, 'error');
   } finally {
