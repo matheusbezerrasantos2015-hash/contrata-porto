@@ -37,9 +37,14 @@ function setFeedback(message, type = '') {
 function renderCompanyJobs(jobs) {
   jobsContainer.innerHTML = '';
 
+  // Atualizar Stats
+  document.getElementById('stat-vagas-ativas').textContent = jobs.filter(j => j.status === 'ATIVA').length;
+  document.getElementById('stat-total-candidatos').textContent = jobs.reduce((acc, curr) => acc + (parseInt(curr.applications_count) || 0), 0);
+  document.getElementById('stat-novas-inscricoes').textContent = jobs.length; // Exemplo simplificado
+
   if (!jobs.length) {
     renderEmptyState(jobsContainer, {
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>',
+      icon: '<i class="fa-solid fa-folder-open" style="font-size: 32px; color: #cbd5e1;"></i>',
       title: 'Sem vagas',
       message: 'Você ainda não publicou nenhuma vaga.'
     });
@@ -48,33 +53,42 @@ function renderCompanyJobs(jobs) {
 
   jobs.forEach((job) => {
     const item = document.createElement('div');
-    item.className = 'sidebar-vaga-item card';
-    item.style.marginBottom = '12px';
+    item.className = 'sidebar-vaga-item';
     const isPaused = job.status === 'PAUSADA';
     const isConcluded = job.status === 'CONCLUIDA';
     const statusText = isPaused ? 'Ativar' : 'Pausar';
     
-    // Dados dinâmicos (titulo, cargo, tipo_contrato) são escapados
-    // IDs numéricos usados em data-attributes não precisam de escape
     item.innerHTML = `
-      <div style="font-weight: 700; color: var(--slate-900); display: flex; align-items: center; justify-content: space-between;">
-        <span>${escapeHTML(job.titulo)}</span>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b;">${escapeHTML(job.titulo)}</h4>
+          <p style="margin: 4px 0 0; font-size: 12px; color: #64748b;">${escapeHTML(job.cargo)} • ${escapeHTML(job.tipo_contrato)}</p>
+        </div>
         ${statusBadge(job.status)}
       </div>
-      <div style="font-size: var(--font-xs); color: var(--slate-500); margin-top: 4px;">
-        ${escapeHTML(job.cargo)} • ${escapeHTML(job.tipo_contrato)}
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+        <button class="btn-sidebar-action" data-edit-job="${job.id}" title="Editar Vaga">
+          <i class="fa-solid fa-pen-to-square"></i> Editar
+        </button>
+        <button class="btn-sidebar-action" data-toggle-job="${job.id}" title="${statusText} Vaga" ${isConcluded ? 'disabled' : ''}>
+          <i class="fa-solid ${isPaused ? 'fa-play' : 'fa-pause'}"></i> ${statusText}
+        </button>
+        <button class="btn-sidebar-action" data-conclude-job="${job.id}" title="Concluir Vaga" ${isConcluded ? 'disabled' : ''}>
+          <i class="fa-solid fa-check-circle"></i> Concluir
+        </button>
+        <button class="btn-sidebar-action" data-delete-job="${job.id}" title="Excluir Vaga" style="color: #ef4444;">
+          <i class="fa-solid fa-trash"></i> Excluir
+        </button>
       </div>
-      <div style="display:flex; flex-direction: column; gap: 6px; margin-top: 10px;">
-        <div style="display:flex; gap: 6px;">
-          <button class="btn btn-ghost" data-edit-job="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; flex: 1;">Editar</button>
-          <button class="btn btn-ghost" data-toggle-job="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; flex: 1;" ${isConcluded ? 'disabled' : ''}>${statusText}</button>
-        </div>
-        <div style="display:flex; gap: 6px;">
-          <button class="btn btn-ghost" data-conclude-job="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; flex: 1;" ${isConcluded ? 'disabled' : ''}>Concluir</button>
-          <button class="btn btn-ghost" data-delete-job="${job.id}" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; flex: 1; color: var(--color-danger);">Excluir</button>
-        </div>
-        <button class="btn btn-secondary btn-block" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')" style="padding: 6px; font-size: var(--font-xs); min-height: 32px; margin-top: 4px;">Ver Candidatos</button>
-      </div>
+
+      <button class="btn-sidebar-main" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
+        <i class="fa-solid fa-users"></i>
+        Ver Candidatos
+        <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 20px; margin-left: auto; font-size: 11px;">
+          ${job.applications_count || 0}
+        </span>
+      </button>
     `;
     jobsContainer.appendChild(item);
   });
