@@ -538,3 +538,294 @@
   color: #888;
   margin-top: 2px;
 }
+
+/* Dashboard Empresa - Formulário de Vaga */
+.job-publish-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border: none !important;
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.job-publish-card .card-header {
+  padding: 24px 24px 0;
+  margin-bottom: 8px;
+}
+
+.job-publish-card .card-header h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.job-publish-card .card-header p {
+  font-size: 14px;
+  color: #888;
+}
+
+.job-form {
+  padding: 8px 0;
+}
+
+.form-section {
+  padding: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.step-number {
+  background: #6c3fc5;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.section-title h3 {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #444;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.job-publish-card .input,
+.job-publish-card .textarea,
+.job-publish-card .select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0e0 !important;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.job-publish-card .input:focus,
+.job-publish-card .textarea:focus,
+.job-publish-card .select:focus {
+  outline: none;
+  border-color: #6c3fc5 !important;
+  box-shadow: 0 0 0 3px rgba(108,63,197,0.12) !important;
+}
+
+.form-actions {
+  padding: 0 24px 24px;
+}
+
+.btn-publish {
+  width: 100%;
+  height: 48px;
+  background: #6c3fc5;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-publish:hover {
+  background: #5a34a3;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard Empresa - Drawer Candidatos */
+.candidatos-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  height: 100vh;
+  background: #fff;
+  z-index: 1001;
+  overflow-y: auto;
+  padding: 0;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.candidatos-drawer.drawer-open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 32px 24px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.drawer-content {
+  padding: 24px;
+  flex: 1;
+}
+
+.candidate-drawer-card {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.candidate-drawer-card:hover {
+  border-color: #6c3fc5;
+  box-shadow: 0 4px 12px rgba(108,63,197,0.08);
+}
+
+.candidate-drawer-info h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.candidate-drawer-info p {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.drawer-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.drawer-status-badge.status-pendente { background: #f3f4f6; color: #4b5563; }
+.drawer-status-badge.status-em_analise { background: #eff6ff; color: #2563eb; }
+.drawer-status-badge.status-aprovado { background: #f0fdf4; color: #16a34a; }
+.drawer-status-badge.status-recusado { background: #fef2f2; color: #dc2626; }
+
+.drawer-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-drawer-action {
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-drawer-action:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #6c3fc5;
+  color: #6c3fc5;
+}
+
+.btn-drawer-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+@media (max-width: 480px) {
+  .candidatos-drawer {
+    width: 100%;
+  }
+}
+
+/* Candidatura - Upload Currículo */
+.upload-area {
+  border: 2px dashed #d0c4f0;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fafafa;
+}
+
+.upload-area:hover, .upload-area.drag-over {
+  border-color: #6c3fc5;
+  background: #f5f0ff;
+}
+
+.upload-placeholder p {
+  margin: 8px 0 0;
+  color: #888;
+  font-size: 14px;
+}
+
+.upload-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #6c3fc5;
+  font-weight: 600;
+}

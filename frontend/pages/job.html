@@ -275,13 +275,21 @@
         </div>
       </div>
 
-      <div class="modal-section">
+      <div class="modal-section" id="grupo-curriculo">
         <h3 class="section-label">Anexar Currículo (Opcional)</h3>
-        <label for="applyResume" class="upload-area">
-          <span class="upload-text" id="uploadText">📄 Clique para anexar ou arraste o PDF aqui</span>
-          <span class="upload-hint">PDF • máx 2MB</span>
-        </label>
-        <input type="file" id="applyResume" accept=".pdf" hidden />
+        <div class="upload-area" id="upload-area-curriculo">
+          <input type="file" id="input-curriculo" accept=".pdf" style="display:none">
+          <div class="upload-placeholder" id="upload-placeholder">
+            <span style="font-size:24px">📄</span>
+            <p>Clique para selecionar ou arraste seu PDF aqui</p>
+          </div>
+          <div class="upload-selected" id="upload-selected" style="display:none">
+            <span>📎</span>
+            <span id="upload-filename"></span>
+            <button type="button" id="btn-remover-curriculo" style="background:none;border:none;color:#e53935;cursor:pointer;margin-left:8px">✕</button>
+          </div>
+        </div>
+        <p style="font-size:11px; color:#888; margin-top:8px;">PDF • Máximo 5MB</p>
       </div>
 
       <div class="modal-actions">
@@ -294,18 +302,6 @@
     </div>
   </div>
   
-  <script>
-    document.getElementById('applyResume').addEventListener('change', function() {
-      const textSpan = document.getElementById('uploadText');
-      if(this.files && this.files.length > 0) {
-        textSpan.textContent = "📄 " + this.files[0].name;
-        textSpan.style.color = "var(--brand-600)";
-      } else {
-        textSpan.textContent = "📄 Clique para anexar ou arraste o PDF aqui";
-        textSpan.style.color = "var(--slate-700)";
-      }
-    });
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/shepherd.js@11/dist/js/shepherd.min.js"></script>
   <script type="module" src="../js/layout.js"></script>
   <script type="module" src="../js/job.js"></script>

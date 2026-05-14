@@ -11,6 +11,7 @@ require_once __DIR__ . '/../services/ApplicationService.php';
 require_once __DIR__ . '/../core/Mailer.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Company.php';
+require_once __DIR__ . '/../core/CloudinaryUploader.php';
 
 final class ApplicationController
 {
@@ -64,37 +65,18 @@ final class ApplicationController
             Response::json(false, 'Not Found', null, 404);
         }
 
-        // Lógica de Upload de Currículo
-        $curriculoPath = null;
-        $file = Request::file('curriculo');
+        // Lógica de Upload de Currículo via Cloudinary
+        $curriculoUrl      = null;
+        $curriculoPublicId = null;
 
-        if ($file && $file['error'] !== UPLOAD_ERR_NO_FILE) {
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                Response::json(false, 'Erro no upload do arquivo.', null, 422);
-            }
-
-            $allowedTypes = ['application/pdf'];
-            if (!in_array($file['type'], $allowedTypes, true)) {
-                Response::json(false, 'Apenas arquivos PDF são permitidos.', null, 422);
-            }
-
-            if ($file['size'] > 2 * 1024 * 1024) { // 2MB
-                Response::json(false, 'Arquivo muito grande. Máximo 2MB.', null, 422);
-            }
-
-            $storageDir = __DIR__ . '/../uploads/curriculos';
-            // Pasta já deve existir mas criamos por segurança
-            if (!is_dir($storageDir)) {
-                mkdir($storageDir, 0777, true);
-            }
-
-            $filename = sprintf('%d_%d.pdf', $user['id'], time());
-            $destination = $storageDir . '/' . $filename;
-
-            if (move_uploaded_file($file['tmp_name'], $destination)) {
-                $curriculoPath = 'uploads/curriculos/' . $filename;
-            } else {
-                Response::json(false, 'Erro ao salvar o arquivo do currículo.', null, 500);
+        if (isset($_FILES['curriculo']) && $_FILES['curriculo']['error'] === UPLOAD_ERR_OK) {
+            try {
+                $upload            = CloudinaryUploader::uploadPDF($_FILES['curriculo']);
+                $curriculoUrl      = $upload['url'];
+                $curriculoPublicId = $upload['public_id'];
+            } catch (Exception $e) {
+                Response::json(false, $e->getMessage(), null, 422);
+                return;
             }
         }
 
@@ -104,7 +86,7 @@ final class ApplicationController
             ':user_id'   => $user['id'],
             ':vaga_id'   => $jobId,
             ':mensagem'  => $mensagem,
-            ':curriculo' => $curriculoPath
+            ':curriculo' => $curriculoUrl // Passamos a URL aqui para a SP se ela suportar, ou NULL
         ]);
         $stmt->closeCursor();
         $codigo = (int) $db->query("SELECT @resultado AS codigo")->fetchColumn();
@@ -118,6 +100,20 @@ final class ApplicationController
         }
 
         $applicationId = (int) $db->lastInsertId();
+
+        // Persistir URL e Public ID se houver upload
+        if ($curriculoUrl && !empty($applicationId)) {
+            $stmtUpdate = $db->prepare(
+                'UPDATE applications
+                 SET curriculo_url = :url, curriculo_public_id = :pid
+                 WHERE id = :id'
+            );
+            $stmtUpdate->execute([
+                ':url' => $curriculoUrl,
+                ':pid' => $curriculoPublicId,
+                ':id'  => $applicationId,
+            ]);
+        }
 
         // Etapa 2: Envio de e-mail postergado
         $companyModel = $this->companyModel;
@@ -144,7 +140,10 @@ final class ApplicationController
             }
         });
 
-        Response::json(true, 'Candidatura enviada com sucesso.', ['id' => $applicationId], 201);
+        Response::json(true, 'Candidatura enviada com sucesso.', [
+            'id' => $applicationId,
+            'curriculo_url' => $curriculoUrl
+        ], 201);
     }
 
     public function myApplications(): void
@@ -255,7 +254,17 @@ final class ApplicationController
             Response::json(false, 'ID inválido.', null, 422);
         }
 
-        $application = $this->applicationModel->findByIdEnriched($id);
+        $db = Database::getConnection();
+        $stmt = $db->prepare(
+            'SELECT a.*, u.nome, u.email, u.telefone,
+                    a.curriculo_url, a.curriculo_public_id
+             FROM applications a
+             JOIN users u ON u.id = a.user_id
+             WHERE a.id = :id'
+        );
+        $stmt->execute([':id' => $id]);
+        $application = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if (!$application) {
             Response::json(false, 'Candidatura não encontrada.', null, 404);
         }

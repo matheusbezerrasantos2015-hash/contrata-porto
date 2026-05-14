@@ -274,8 +274,77 @@ function closeModal() {
   document.getElementById('applyLinkedin').value = '';
   document.getElementById('applyPortfolio').value = '';
   document.getElementById('applyPhone').value = '';
-  document.getElementById('applyResume').value = '';
+  
+  // Reset Upload Area
+  const input = document.getElementById('input-curriculo');
+  if (input) input.value = '';
+  document.getElementById('upload-placeholder').style.display = 'block';
+  document.getElementById('upload-selected').style.display = 'none';
+  document.getElementById('upload-area-curriculo').classList.remove('drag-over');
 }
+
+// Lógica de Upload de Currículo
+const uploadArea = document.getElementById('upload-area-curriculo');
+const inputCurriculo = document.getElementById('input-curriculo');
+const uploadPlaceholder = document.getElementById('upload-placeholder');
+const uploadSelected = document.getElementById('upload-selected');
+const uploadFilename = document.getElementById('upload-filename');
+const btnRemoverCurriculo = document.getElementById('btn-remover-curriculo');
+
+uploadArea?.addEventListener('click', () => inputCurriculo?.click());
+
+inputCurriculo?.addEventListener('change', () => {
+  if (inputCurriculo.files.length > 0) {
+    handleFileSelection(inputCurriculo.files[0]);
+  }
+});
+
+uploadArea?.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadArea.classList.add('drag-over');
+});
+
+uploadArea?.addEventListener('dragleave', () => {
+  uploadArea.classList.remove('drag-over');
+});
+
+uploadArea?.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFileSelection(files[0]);
+    // Sincroniza o input file (opcional mas bom para consistência)
+    const dt = new DataTransfer();
+    dt.items.add(files[0]);
+    inputCurriculo.files = dt.files;
+  }
+});
+
+function handleFileSelection(file) {
+  if (file.type !== 'application/pdf') {
+    showToast('Por favor, selecione um arquivo PDF.', 'error');
+    inputCurriculo.value = '';
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('O arquivo deve ter no máximo 5MB.', 'error');
+    inputCurriculo.value = '';
+    return;
+  }
+
+  uploadFilename.textContent = file.name;
+  uploadPlaceholder.style.display = 'none';
+  uploadSelected.style.display = 'flex';
+}
+
+btnRemoverCurriculo?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  inputCurriculo.value = '';
+  uploadPlaceholder.style.display = 'block';
+  uploadSelected.style.display = 'none';
+});
 
 // Submeter candidatura
 document.getElementById('confirmApply').addEventListener('click', async () => {
@@ -283,17 +352,18 @@ document.getElementById('confirmApply').addEventListener('click', async () => {
   const linkedin = document.getElementById('applyLinkedin').value.trim();
   const portfolio = document.getElementById('applyPortfolio').value.trim();
   const phone = document.getElementById('applyPhone').value.trim();
-  const resume = document.getElementById('applyResume').files[0];
+  const resume = document.getElementById('input-curriculo')?.files[0];
   const jobId = getJobIdFromUrl();
   const submitBtn = document.getElementById('confirmApply');
 
+  // Validação extra de segurança (já feita no handleFileSelection mas boa aqui também)
   if (resume) {
     if (resume.type !== 'application/pdf') {
-      showToast('Por favor, selecione um arquivo PDF.', 'error');
+      showToast('Apenas arquivos PDF são permitidos.', 'error');
       return;
     }
-    if (resume.size > 2 * 1024 * 1024) {
-      showToast('O arquivo deve ter no máximo 2MB.', 'error');
+    if (resume.size > 5 * 1024 * 1024) {
+      showToast('O arquivo deve ter no máximo 5MB.', 'error');
       return;
     }
   }

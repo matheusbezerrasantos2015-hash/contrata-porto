@@ -113,3 +113,8 @@ CREATE TABLE email_verifications (
 
 -- Stored Procedures
 -- (ver database/procedures.sql para as 4 SPs do projeto)
+
+-- Migration: Adicionando suporte a currículos via Cloudinary
+ALTER TABLE applications
+  ADD COLUMN curriculo_url      VARCHAR(500) NULL AFTER status,
+  ADD COLUMN curriculo_public_id VARCHAR(200) NULL AFTER curriculo_url;

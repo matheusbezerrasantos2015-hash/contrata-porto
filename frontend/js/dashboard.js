@@ -7,9 +7,16 @@ import { escapeHTML } from './utils.js';
 requireAuth({ role: 'empresa' });
 
 const jobsContainer = document.getElementById('companyJobs');
-const candidatesContainer = document.getElementById('candidates');
 const jobForm = document.getElementById('jobForm');
 const feedback = document.getElementById('feedback');
+
+// Drawer de Candidatos (Novo)
+const drawer = document.getElementById('candidatos-drawer');
+const overlay = document.getElementById('candidatos-overlay');
+const drawerTitle = document.getElementById('drawer-title');
+const drawerSubtitle = document.getElementById('drawer-subtitle');
+const drawerContent = document.getElementById('drawer-content');
+const btnFecharDrawer = document.getElementById('btn-fechar-drawer');
 
 // Modal Elements
 const editModal = document.getElementById('editJobModal');
@@ -74,33 +81,120 @@ function renderCompanyJobs(jobs) {
   });
 }
 
-function renderCandidates(candidates) {
-  candidatesContainer.innerHTML = '';
+function statusBadgeDrawer(status = '') {
+  const normalized = String(status).toUpperCase();
+  const map = {
+    'PENDENTE': { label: 'Pendente', className: 'status-pendente' },
+    'ENVIADA': { label: 'Pendente', className: 'status-pendente' },
+    'EM_ANALISE': { label: 'Em análise', className: 'status-em_analise' },
+    'APROVADO': { label: 'Aprovado', className: 'status-aprovado' },
+    'APROVADA': { label: 'Aprovado', className: 'status-aprovado' },
+    'RECUSADO': { label: 'Recusado', className: 'status-recusado' },
+    'RECUSADA': { label: 'Recusado', className: 'status-recusado' }
+  };
+
+  const config = map[normalized] || { label: normalized, className: 'status-pendente' };
+  return `<span class="drawer-status-badge ${config.className}">${config.label}</span>`;
+}
+
+function renderCandidatesInDrawer(candidates) {
+  drawerContent.innerHTML = '';
 
   if (!candidates.length) {
-    renderEmptyState(candidatesContainer, {
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M16 12a4 4 0 0 1-8 0"></path></svg>',
-      title: 'Sem Candidatos',
-      message: 'Aguardando as primeiras candidaturas para esta vaga.'
-    });
+    drawerContent.innerHTML = `
+      <div style="text-align: center; padding: 48px 0; color: #9ca3af;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;"><circle cx="12" cy="12" r="10"></circle><path d="M16 12a4 4 0 0 1-8 0"></path></svg>
+        <p style="font-size: 15px; font-weight: 500; color: #374151;">Nenhum candidato ainda.</p>
+        <p style="font-size: 13px; color: #6b7280;">Aguardando as primeiras candidaturas.</p>
+      </div>
+    `;
     return;
   }
 
-  candidatesContainer.innerHTML = candidates
+  drawerContent.innerHTML = candidates
     .map((item) => `
-      <article class="candidate-card card">
-        <div class="candidate-info">
-          <h4>${escapeHTML(item.candidato_nome)}</h4>
+      <article class="candidate-drawer-card">
+        <div class="candidate-drawer-info">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <h4>${escapeHTML(item.candidato_nome)}</h4>
+            ${statusBadgeDrawer(item.status)}
+          </div>
           <p>${escapeHTML(item.candidato_email)}</p>
-          <div class="mt-1">${statusBadge(item.status)}</div>
         </div>
-        <div class="candidate-actions" style="display: flex; gap: var(--space-1); margin-top: var(--space-2); width: 100%;">
-          <button class="btn btn-ghost" data-view-candidate="${item.id}" style="padding: 8px; font-size: var(--font-xs); flex: 1;">Ver Perfil Completo</button>
+        <div class="drawer-actions">
+          <button class="btn-drawer-action" data-view-candidate="${item.id}">
+            Ver Perfil
+          </button>
+          <button class="btn-drawer-action" data-view-resume="${item.id}" data-candidate-name="${escapeHTML(item.candidato_nome)}">
+            Ver Currículo
+          </button>
         </div>
       </article>
     `)
     .join('');
 }
+
+// Lógica do Modal de Currículo (Cloudinary)
+async function abrirModalCurriculo(applicationId, candidatoNome) {
+  try {
+    const response = await withGlobalLoader(() => getApplicationById(applicationId));
+    const item = normalizeApiResponse(response);
+
+    if (item.curriculo_url) {
+      document.getElementById('curriculo-modal-nome').textContent = candidatoNome;
+      const btnVer = document.getElementById('btn-ver-curriculo');
+      const btnBaixar = document.getElementById('btn-baixar-curriculo');
+      
+      btnVer.href = item.curriculo_url;
+      // fl_attachment=true força o Cloudinary a enviar Content-Disposition: attachment
+      btnBaixar.href = item.curriculo_url + (item.curriculo_url.includes('?') ? '&' : '?') + 'fl_attachment=true';
+      
+      document.getElementById('curriculo-modal-overlay').style.display = 'flex';
+    } else {
+      showToast('Este candidato não anexou currículo', 'info');
+    }
+  } catch (error) {
+    showToast(error.message || 'Erro ao carregar currículo', 'error');
+  }
+}
+
+function fecharModalCurriculo() {
+  document.getElementById('curriculo-modal-overlay').style.display = 'none';
+}
+
+// Helpers para UI
+function withGlobalLoader(fn) {
+  return fn(); // Por enquanto apenas executa, mas mantém estrutura para possível loading global
+}
+
+async function abrirDrawerCandidatos(vagaId, vagaTitulo) {
+  activeJobId = vagaId;
+  drawerTitle.textContent = `Candidatos — ${escapeHTML(vagaTitulo)}`;
+  drawerSubtitle.textContent = `Visualizando candidaturas para esta vaga.`;
+  
+  overlay.style.display = 'block';
+  drawer.classList.add('drawer-open');
+  document.body.style.overflow = 'hidden';
+
+  try {
+    renderSkeleton(drawerContent, 'card', 3);
+    const response = await getJobApplications(vagaId);
+    const data = normalizeApiResponse(response);
+    renderCandidatesInDrawer(data);
+  } catch (error) {
+    showToast(error.message, 'error');
+    fecharDrawer();
+  }
+}
+
+function fecharDrawer() {
+  overlay.style.display = 'none';
+  drawer.classList.remove('drawer-open');
+  document.body.style.overflow = '';
+}
+
+btnFecharDrawer?.addEventListener('click', fecharDrawer);
+overlay?.addEventListener('click', fecharDrawer);
 
 async function loadCompanyJobs() {
   if (!isAuthenticated()) { redirectToLogin(); return; }
@@ -380,26 +474,34 @@ jobsContainer?.addEventListener('click', async (event) => {
 
   const button = event.target.closest('button[data-job-id]');
   if (button) {
-    try {
-      renderSkeleton(candidatesContainer, 'card', 2);
-      activeJobId = button.dataset.jobId;
-      const response = await getJobApplications(activeJobId);
-      const data = normalizeApiResponse(response);
-      renderCandidates(data);
-    } catch (error) {
-      showToast(error.message, 'error');
-      setFeedback(error.message, 'error');
-    }
+    const vagaId = button.dataset.jobId;
+    const item = currentJobs.find(j => String(j.id) === String(vagaId));
+    abrirDrawerCandidatos(vagaId, item ? item.titulo : 'Vaga');
   }
 });
 
 // Delegação para abertura de modal de candidatos (centralizada)
 document.addEventListener('click', (event) => {
+  // Modal de Perfil
   const viewCandidateBtn = event.target.closest('button[data-view-candidate]');
   if (viewCandidateBtn) {
     const id = Number(viewCandidateBtn.dataset.viewCandidate);
-    console.log('[DASHBOARD] Abrindo modal para candidato:', id);
     openCandidateModal(id);
+    return;
+  }
+
+  // Modal de Currículo
+  const viewResumeBtn = event.target.closest('button[data-view-resume]');
+  if (viewResumeBtn) {
+    const id = Number(viewResumeBtn.dataset.viewResume);
+    const name = viewResumeBtn.dataset.candidateName;
+    abrirModalCurriculo(id, name);
+    return;
+  }
+
+  // Fechar Modal Currículo
+  if (event.target.id === 'curriculo-modal-overlay' || event.target.id === 'btn-fechar-modal-curriculo') {
+    fecharModalCurriculo();
   }
 });
 
@@ -426,7 +528,7 @@ candidateModalContent?.addEventListener('click', async (event) => {
     if (activeJobId) {
       const resp = await getJobApplications(activeJobId);
       const candData = normalizeApiResponse(resp);
-      renderCandidates(candData);
+      renderCandidatesInDrawer(candData);
     }
   } catch (error) {
     showToast(error.message, 'error');
