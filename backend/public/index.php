@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Debug logging para rastrear requisições
+error_log('[ROUTER] Requisição recebida: ' . ($_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN') . ' ' . ($_SERVER['REQUEST_URI'] ?? 'UNKNOWN'));
+
 $config = require __DIR__ . '/../config/app.php';
 date_default_timezone_set($config['app']['timezone']);
 
