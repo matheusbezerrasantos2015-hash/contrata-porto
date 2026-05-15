@@ -7,7 +7,7 @@ import { escapeHTML } from './utils.js';
 requireAuth({ role: 'empresa' });
 
 const jobsContainer = document.getElementById('companyJobs');
-const candidatesContainer = document.getElementById('candidates');
+
 const jobForm = document.getElementById('jobForm');
 const feedback = document.getElementById('feedback');
 
@@ -43,6 +43,7 @@ function renderCompanyJobs(jobs) {
   jobs.forEach((job) => {
     const item = document.createElement('div');
     item.className = 'sidebar-vaga-item';
+    item.setAttribute('data-vaga-id', job.id);
     const isPaused = job.status === 'PAUSADA';
     const isConcluded = job.status === 'CONCLUIDA';
     const statusText = isPaused ? 'Ativar' : 'Pausar';
@@ -71,8 +72,8 @@ function renderCompanyJobs(jobs) {
         </button>
       </div>
 
-      <button class="btn btn-primary btn-block btn-sm" style="margin-top: var(--space-2);" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
-        Ver Candidatos (${job.applications_count || 0})
+      <button class="btn btn-primary btn-block btn-sm btn-ver-candidatos" style="margin-top: var(--space-2);" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
+        Ver Candidatos
       </button>
     `;
     jobsContainer.appendChild(item);
@@ -100,6 +101,10 @@ function abrirDrawerCandidatos(vagaId, vagaTitulo) {
     .then(response => {
         const data = normalizeApiResponse(response);
         const apps = Array.isArray(data) ? data : (data.items || []);
+        
+        const total = apps.length;
+        const btnVer = document.querySelector(`[data-vaga-id="${vagaId}"] .btn-ver-candidatos`);
+        if (btnVer) btnVer.textContent = `Ver Candidatos (${total})`;
         
         if (!apps.length) {
             conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Nenhum candidato ainda.</p>';

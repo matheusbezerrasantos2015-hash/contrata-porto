@@ -103,6 +103,16 @@ function bindAuthNav() {
       navDashboard.textContent = auth.role === 'empresa' ? 'Recrutamento' : 'Minhas Vagas';
     }
 
+    // Favoritos visibility based on role
+    const favoritesLink = document.getElementById('favoritesLink');
+    if (favoritesLink) {
+      if (auth.role === 'empresa') {
+        favoritesLink.classList.add('hidden');
+      } else {
+        favoritesLink.classList.remove('hidden');
+      }
+    }
+
     // Dynamic Settings Links
     const sLink = document.getElementById('settingsLink');
     const sLinkDrop = document.getElementById('settingsLinkDropdown');
