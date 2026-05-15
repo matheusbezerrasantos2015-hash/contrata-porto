@@ -101,11 +101,16 @@ final class ApplicationController
 
         $applicationId = (int) $db->lastInsertId();
 
+        // [APPLY_DEBUG] Adicionando logs para rastreio
+        error_log('[APPLY_DEBUG] curriculo_url=' . ($curriculoUrl ?? 'NULL'));
+        error_log('[APPLY_DEBUG] applicationId=' . ($applicationId ?? 'NULL'));
+
         // Persistir URL e Public ID se houver upload
-        if ($curriculoUrl && !empty($applicationId)) {
+        if (!empty($curriculoUrl) && !empty($applicationId)) {
             $stmtUpdate = $db->prepare(
                 'UPDATE applications
-                 SET curriculo_url = :url, curriculo_public_id = :pid
+                 SET curriculo_url = :url, 
+                     curriculo_public_id = :pid
                  WHERE id = :id'
             );
             $stmtUpdate->execute([
@@ -256,8 +261,10 @@ final class ApplicationController
 
         $db = Database::getConnection();
         $stmt = $db->prepare(
-            'SELECT a.*, u.nome, u.email, u.telefone,
-                    a.curriculo_url, a.curriculo_public_id
+            'SELECT a.id, a.user_id, a.vaga_id, a.status, a.mensagem,
+                    a.curriculo_url, a.curriculo_public_id,
+                    u.nome AS candidato_nome, u.email AS candidato_email,
+                    u.telefone, u.cidade, u.linkedin, u.portfolio
              FROM applications a
              JOIN users u ON u.id = a.user_id
              WHERE a.id = :id'
