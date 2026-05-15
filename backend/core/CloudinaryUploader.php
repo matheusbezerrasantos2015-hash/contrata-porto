@@ -39,11 +39,9 @@ class CloudinaryUploader
             'folder'    => $folder,
             'timestamp' => $timestamp,
         ];
-        ksort($params);
-
-        // Montar string: "folder=X&timestamp=Y" + apiSecret
-        $paramStr  = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-        $toSign    = $paramStr . $apiSecret;
+        // Montar a string manualmente sem encoding da barra
+        $paramStr = 'folder=' . $folder . '&timestamp=' . $timestamp;
+        $toSign   = $paramStr . $apiSecret;
         
         // Assinatura correta: SHA1 (não HMAC-SHA256)
         $signature = sha1($toSign);
