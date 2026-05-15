@@ -6,7 +6,7 @@ import { escapeHTML } from './utils.js';
 
 requireAuth({ role: 'empresa' });
 
-const jobsContainer = document.getElementById('companyJobs');
+const jobsContainer = document.getElementById('lista-vagas');
 
 const jobForm = document.getElementById('jobForm');
 const feedback = document.getElementById('feedback');
@@ -28,23 +28,10 @@ function setFeedback(message, type = '') {
   feedback.className = `message ${type}`.trim();
 }
 
-function renderCompanyJobs(jobs) {
+function renderCompanyJobs(vagas) {
+  if (!jobsContainer) return;
   jobsContainer.innerHTML = '';
   
-  const totalEl = document.getElementById('vagas-total');
-  if (totalEl) {
-    totalEl.textContent = jobs.length + ' vaga' + (jobs.length !== 1 ? 's' : '');
-  }
-
-  if (!jobs.length) {
-    renderEmptyState(jobsContainer, {
-      icon: '<i class="fa-solid fa-folder-open"></i>',
-      title: 'Sem vagas',
-      message: 'Publique sua primeira vaga.'
-    });
-    return;
-  }
-
   const statusMap = {
     'ATIVA':     { label: 'ATIVA',     classe: 'ativa' },
     'PAUSADA':   { label: 'PAUSADA',   classe: 'pausada' },
@@ -52,43 +39,48 @@ function renderCompanyJobs(jobs) {
     'EXPIRADA':  { label: 'EXPIRADA',  classe: 'expirada' },
   };
 
-  jobs.forEach((job) => {
-    const st = statusMap[job.status] || { label: job.status, classe: 'ativa' };
-    const isPaused = job.status === 'PAUSADA';
-    const isConcluded = job.status === 'CONCLUIDA';
-    const statusText = isPaused ? 'Ativar' : 'Pausar';
-    const toggleIcon = isPaused ? 'fa-play' : 'fa-pause';
+  if (!vagas.length) {
+    renderEmptyState(jobsContainer, {
+      icon: '<i class="fa-solid fa-folder-open"></i>',
+      title: 'Sem vagas',
+      message: 'Publique sua primeira vaga.'
+    });
+  } else {
+    vagas.forEach((vaga) => {
+      const st = statusMap[vaga.status] || { label: vaga.status, classe: 'ativa' };
+      const pausaOuPlay = vaga.status === 'PAUSADA'
+          ? `<button onclick="reativarVaga(${vaga.id})" title="Reativar">▶</button>`
+          : `<button onclick="pausarVaga(${vaga.id})" title="Pausar">⏸</button>`;
 
-    const item = document.createElement('div');
-    item.className = 'vaga-item';
-    item.setAttribute('data-vaga-id', job.id);
-    
-    item.innerHTML = `
-        <div class="vaga-item-top">
-            <span class="vaga-item-titulo">${escapeHTML(job.titulo)}</span>
-            <span class="vaga-status-badge ${st.classe}">${st.label}</span>
-        </div>
-        <div class="vaga-item-cargo">${escapeHTML(job.cargo || '')}</div>
-        <div class="vaga-item-acoes">
-            <button data-edit-job="${job.id}" title="Editar">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-            <button data-toggle-job="${job.id}" title="${statusText}" ${isConcluded ? 'disabled' : ''}>
-              <i class="fa-solid ${toggleIcon}"></i>
-            </button>
-            <button data-conclude-job="${job.id}" title="Concluir" ${isConcluded ? 'disabled' : ''}>
-              <i class="fa-solid fa-check"></i>
-            </button>
-            <button class="btn-excluir" data-delete-job="${job.id}" title="Excluir">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-        </div>
-        <button class="btn-ver-candidatos" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
-            Ver Candidatos
-        </button>
-    `;
-    jobsContainer.appendChild(item);
-  });
+      const item = document.createElement('div');
+      item.className = 'vaga-item';
+      item.setAttribute('data-vaga-id', vaga.id);
+      
+      item.innerHTML = `
+          <div class="vaga-item-top">
+              <span class="vaga-item-titulo">${escapeHTML(vaga.titulo)}</span>
+              <span class="vaga-status-badge ${st.classe}">${st.label}</span>
+          </div>
+          <div class="vaga-item-cargo">${escapeHTML(vaga.cargo || '')}</div>
+          <div class="vaga-item-acoes">
+              <button onclick="editarVaga(${vaga.id})" title="Editar">✏️</button>
+              ${pausaOuPlay}
+              <button onclick="concluirVaga(${vaga.id})" title="Concluir">✓</button>
+              <button class="btn-excluir" onclick="excluirVaga(${vaga.id})" title="Excluir">🗑</button>
+          </div>
+          <button class="btn-ver-candidatos"
+                  onclick="abrirDrawerCandidatos(${vaga.id}, '${vaga.titulo.replace(/'/g, "\\'")}')">
+              Ver Candidatos
+          </button>
+      `;
+      jobsContainer.appendChild(item);
+    });
+  }
+
+  // Atualizar contador
+  const total = vagas.length;
+  const el = document.getElementById('vagas-total');
+  if (el) el.textContent = total + ' vaga' + (total !== 1 ? 's' : '');
 }
 
 function abrirDrawerCandidatos(vagaId, vagaTitulo) {
@@ -216,6 +208,56 @@ window.fecharDrawer = fecharDrawer;
 window.verPerfilCandidato = openCandidateModal;
 window.abrirModalCurriculo = abrirModalCurriculo;
 window.fecharModalCurriculo = fecharModalCurriculo;
+
+// Funções globais para ações de vaga
+window.editarVaga = (id) => {
+    const job = currentJobs.find(j => Number(j.id) === id);
+    if (job) openEditModal(job);
+};
+
+window.reativarVaga = async (id) => {
+    if (!confirmAction('Reativar esta vaga?')) return;
+    try {
+        await toggleJobStatus(id);
+        showToast('Vaga reativada com sucesso.', 'success');
+        loadCompanyJobs();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+};
+
+window.pausarVaga = async (id) => {
+    if (!confirmAction('Pausar esta vaga?')) return;
+    try {
+        await toggleJobStatus(id);
+        showToast('Vaga pausada com sucesso.', 'success');
+        loadCompanyJobs();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+};
+
+window.concluirVaga = async (id) => {
+    if (!confirmAction('Após concluída, a vaga ficará visível por mais 3 dias e será removida automaticamente. Confirmar?')) return;
+    try {
+        await concludeJob(id);
+        showToast('Vaga concluída com sucesso.', 'success');
+        loadCompanyJobs();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+};
+
+window.excluirVaga = async (id) => {
+    if (!confirmAction('Esta ação é irreversível. Todos os candidatos serão removidos. Confirmar exclusão?')) return;
+    try {
+        await deleteJob(id);
+        showToast('Vaga e candidaturas deletadas com sucesso.', 'success');
+        loadCompanyJobs();
+    } catch (error) {
+        showToast(error.message, 'error');
+    }
+};
 
 // Listeners de UI
 document.addEventListener('DOMContentLoaded', function() {
