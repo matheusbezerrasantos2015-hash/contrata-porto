@@ -123,9 +123,14 @@
       </section>
 
       <aside class="dashboard-sidebar">
-        <div class="card">
-          <h3>Suas Vagas Ativas</h3>
-          <div id="companyJobs" class="sidebar-vagas"></div>
+        <div class="vagas-lista-container">
+          <div class="vagas-lista-header">
+            <h3>Suas Vagas Ativas</h3>
+            <span class="vagas-total" id="vagas-total">0 vagas</span>
+          </div>
+          <div class="vagas-lista-scroll" id="companyJobs">
+            <!-- cards renderizados pelo JS -->
+          </div>
         </div>
       </aside>
     </div>

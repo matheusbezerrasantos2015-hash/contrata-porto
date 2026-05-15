@@ -2,3 +2,235 @@
 @import url('./components.css');
 @import url('./layout.css');
 @import url('./pages.css');
+
+/* ================================================
+   RESPONSIVIDADE — ContrataPorto
+   Breakpoints: mobile ≤480px | tablet 481–768px
+   ================================================ */
+
+/* HEADER / NAVEGAÇÃO */
+@media (max-width: 768px) {
+    nav, .nav-links {
+        gap: 12px;
+    }
+    .nav-links a {
+        font-size: 13px;
+    }
+    .avatar-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    header, .site-header {
+        padding: 12px 16px;
+    }
+    .nav-links {
+        gap: 8px;
+    }
+    .nav-links a {
+        font-size: 12px;
+    }
+}
+
+/* LAYOUT GERAL — container e grid */
+@media (max-width: 768px) {
+    .container, main, .page-content {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+    /* Layout de 2 colunas vira 1 coluna */
+    .dashboard-grid,
+    .two-col,
+    .grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* DASHBOARD EMPRESA */
+@media (max-width: 768px) {
+    .vagas-lista-container {
+        position: static;
+        margin-top: 24px;
+    }
+    .vagas-lista-scroll {
+        max-height: 400px;
+    }
+    .form-row {
+        grid-template-columns: 1fr !important;
+    }
+    .form-vaga-card {
+        border-radius: 12px;
+    }
+    .form-section {
+        padding: 16px;
+    }
+    .btn-publicar-vaga {
+        width: calc(100% - 32px);
+        margin: 0 16px 16px;
+    }
+}
+
+/* DRAWER DE CANDIDATOS */
+@media (max-width: 768px) {
+    #candidatos-drawer {
+        width: 100% !important;
+        border-radius: 20px 20px 0 0;
+        top: auto !important;
+        bottom: 0;
+        height: 85vh !important;
+        transform: translateY(100%) !important;
+        transition: transform 0.3s ease-in-out;
+    }
+    #candidatos-drawer.drawer-open {
+        transform: translateY(0) !important;
+    }
+}
+
+/* MODAL DE CURRÍCULO */
+@media (max-width: 480px) {
+    #curriculo-modal-overlay > div {
+        width: calc(100% - 32px) !important;
+        padding: 24px 16px !important;
+        border-radius: 16px;
+    }
+    #curriculo-modal-overlay > div > div {
+        flex-direction: column;
+    }
+    #btn-ver-curriculo,
+    #btn-baixar-curriculo {
+        width: 100%;
+    }
+}
+
+/* MODAL DE CANDIDATURA (job.js) */
+@media (max-width: 768px) {
+    .modal-candidatura,
+    .modal-content,
+    [class*="modal"] > div {
+        width: calc(100% - 32px) !important;
+        max-width: 100% !important;
+        margin: 16px !important;
+        border-radius: 16px;
+        padding: 20px 16px !important;
+    }
+    .upload-area {
+        padding: 14px;
+    }
+}
+
+/* PÁGINA DE VAGA (vaga.html) */
+@media (max-width: 768px) {
+    .vaga-detail-grid,
+    .vaga-layout {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+    }
+    .vaga-sidebar {
+        order: -1;
+    }
+}
+
+/* LISTAGEM DE VAGAS (index.html) */
+@media (max-width: 768px) {
+    .jobs-grid,
+    .vagas-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+    }
+    .search-bar,
+    .filtros-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .search-bar input,
+    .filtros-container select {
+        width: 100% !important;
+    }
+}
+
+/* CARDS DE VAGA na listagem */
+@media (max-width: 480px) {
+    .job-card, .vaga-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    .job-card h3, .vaga-card h3 {
+        font-size: 15px;
+    }
+}
+
+/* PÁGINAS DE AUTH (login, register) */
+@media (max-width: 480px) {
+    .auth-card,
+    .login-card,
+    .register-card {
+        width: calc(100% - 32px) !important;
+        max-width: 100% !important;
+        padding: 24px 16px !important;
+        margin: 16px auto !important;
+        border-radius: 16px;
+    }
+}
+
+/* CANDIDATE DASHBOARD */
+@media (max-width: 768px) {
+    .candidate-dashboard-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .candidatura-card {
+        padding: 14px;
+    }
+}
+
+/* PÁGINAS DE CONFIGURAÇÕES */
+@media (max-width: 768px) {
+    .settings-grid,
+    .settings-layout {
+        grid-template-columns: 1fr !important;
+    }
+    .settings-card {
+        padding: 20px 16px;
+    }
+}
+
+/* LANDING PAGE */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: clamp(24px, 6vw, 36px);
+    }
+    .hero-section p {
+        font-size: 15px;
+    }
+    .hero-cta-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .hero-cta-buttons a,
+    .hero-cta-buttons button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* UTILITÁRIOS MOBILE */
+@media (max-width: 480px) {
+    /* Textos grandes demais no mobile */
+    h1 { font-size: clamp(22px, 5vw, 32px); }
+    h2 { font-size: clamp(18px, 4vw, 26px); }
+
+    /* Botões com altura mínima para toque */
+    button, .btn, a.btn {
+        min-height: 44px;
+    }
+
+    /* Toast / notificações */
+    .toast, .notification {
+        width: calc(100% - 32px) !important;
+        left: 16px !important;
+        right: 16px !important;
+        bottom: 16px;
+    }
+}

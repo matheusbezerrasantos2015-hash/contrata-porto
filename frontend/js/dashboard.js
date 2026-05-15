@@ -30,6 +30,11 @@ function setFeedback(message, type = '') {
 
 function renderCompanyJobs(jobs) {
   jobsContainer.innerHTML = '';
+  
+  const totalEl = document.getElementById('vagas-total');
+  if (totalEl) {
+    totalEl.textContent = jobs.length + ' vaga' + (jobs.length !== 1 ? 's' : '');
+  }
 
   if (!jobs.length) {
     renderEmptyState(jobsContainer, {
@@ -40,41 +45,47 @@ function renderCompanyJobs(jobs) {
     return;
   }
 
+  const statusMap = {
+    'ATIVA':     { label: 'ATIVA',     classe: 'ativa' },
+    'PAUSADA':   { label: 'PAUSADA',   classe: 'pausada' },
+    'CONCLUIDA': { label: 'CONCLUÍDA', classe: 'concluida' },
+    'EXPIRADA':  { label: 'EXPIRADA',  classe: 'expirada' },
+  };
+
   jobs.forEach((job) => {
-    const item = document.createElement('div');
-    item.className = 'sidebar-vaga-item';
-    item.setAttribute('data-vaga-id', job.id);
+    const st = statusMap[job.status] || { label: job.status, classe: 'ativa' };
     const isPaused = job.status === 'PAUSADA';
     const isConcluded = job.status === 'CONCLUIDA';
     const statusText = isPaused ? 'Ativar' : 'Pausar';
+    const toggleIcon = isPaused ? 'fa-play' : 'fa-pause';
+
+    const item = document.createElement('div');
+    item.className = 'vaga-item';
+    item.setAttribute('data-vaga-id', job.id);
     
     item.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-2);">
-        <div>
-          <strong style="display: block; font-size: var(--font-sm);">${escapeHTML(job.titulo)}</strong>
-          <span style="font-size: var(--font-xs); color: var(--slate-500);">${escapeHTML(job.cargo)}</span>
+        <div class="vaga-item-top">
+            <span class="vaga-item-titulo">${escapeHTML(job.titulo)}</span>
+            <span class="vaga-status-badge ${st.classe}">${st.label}</span>
         </div>
-        ${statusBadge(job.status)}
-      </div>
-      
-      <div style="display: flex; gap: var(--space-1); margin-top: var(--space-2);">
-        <button class="btn btn-ghost btn-sm" data-edit-job="${job.id}" title="Editar">
-          <i class="fa-solid fa-pen"></i>
+        <div class="vaga-item-cargo">${escapeHTML(job.cargo || '')}</div>
+        <div class="vaga-item-acoes">
+            <button data-edit-job="${job.id}" title="Editar">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button data-toggle-job="${job.id}" title="${statusText}" ${isConcluded ? 'disabled' : ''}>
+              <i class="fa-solid ${toggleIcon}"></i>
+            </button>
+            <button data-conclude-job="${job.id}" title="Concluir" ${isConcluded ? 'disabled' : ''}>
+              <i class="fa-solid fa-check"></i>
+            </button>
+            <button class="btn-excluir" data-delete-job="${job.id}" title="Excluir">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+        <button class="btn-ver-candidatos" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
+            Ver Candidatos
         </button>
-        <button class="btn btn-ghost btn-sm" data-toggle-job="${job.id}" title="${statusText}" ${isConcluded ? 'disabled' : ''}>
-          <i class="fa-solid ${isPaused ? 'fa-play' : 'fa-pause'}"></i>
-        </button>
-        <button class="btn btn-ghost btn-sm" data-conclude-job="${job.id}" title="Concluir" ${isConcluded ? 'disabled' : ''}>
-          <i class="fa-solid fa-check"></i>
-        </button>
-        <button class="btn btn-ghost btn-sm" data-delete-job="${job.id}" title="Excluir" style="color: var(--color-danger);">
-          <i class="fa-solid fa-trash"></i>
-        </button>
-      </div>
-
-      <button class="btn btn-primary btn-block btn-sm btn-ver-candidatos" style="margin-top: var(--space-2);" onclick="abrirDrawerCandidatos(${job.id}, '${escapeHTML(job.titulo).replace(/'/g, "\\'")}')">
-        Ver Candidatos
-      </button>
     `;
     jobsContainer.appendChild(item);
   });
@@ -91,7 +102,10 @@ function abrirDrawerCandidatos(vagaId, vagaTitulo) {
     if (conteudo) conteudo.innerHTML = '<p style="color:#888; text-align:center; margin-top:40px;">Carregando...</p>';
 
     if (overlay) overlay.style.display = 'block';
-    if (drawer) drawer.style.transform = 'translateX(0)';
+    if (drawer) {
+        drawer.style.transform = 'translateX(0)';
+        drawer.classList.add('drawer-open');
+    }
 
     const token = localStorage.getItem('token');
     fetch(`${API_URL}/jobs/${vagaId}/applications`, {
@@ -161,7 +175,10 @@ function abrirDrawerCandidatos(vagaId, vagaTitulo) {
 function fecharDrawer() {
     const drawer = document.getElementById('candidatos-drawer');
     const overlay = document.getElementById('candidatos-overlay');
-    if (drawer) drawer.style.transform = 'translateX(100%)';
+    if (drawer) {
+        drawer.style.transform = 'translateX(100%)';
+        drawer.classList.remove('drawer-open');
+    }
     if (overlay) overlay.style.display = 'none';
 }
 
