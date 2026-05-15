@@ -180,20 +180,27 @@ async function abrirModalCurriculo(applicationId, candidatoNome) {
     const response = await getApplicationById(applicationId);
     const item = normalizeApiResponse(response);
 
-    if (item.curriculo_url) {
+    if (item && item.curriculo_url) {
       document.getElementById('curriculo-modal-nome').textContent = candidatoNome;
-      const btnVer = document.getElementById('btn-ver-curriculo');
-      const btnBaixar = document.getElementById('btn-baixar-curriculo');
       
-      btnVer.href = item.curriculo_url;
-      btnBaixar.href = item.curriculo_url + (item.curriculo_url.includes('?') ? '&' : '?') + 'fl_attachment=true';
+      // Ver no navegador — abre direto a URL do Cloudinary
+      document.getElementById('btn-ver-curriculo').href = item.curriculo_url;
       
-      document.getElementById('curriculo-modal-overlay').style.display = 'flex';
+      // Baixar — força download via fl_attachment do Cloudinary
+      const downloadUrl = item.curriculo_url.includes('?')
+        ? item.curriculo_url + '&fl_attachment=true'
+        : item.curriculo_url + '?fl_attachment=true';
+      document.getElementById('btn-baixar-curriculo').href = downloadUrl;
+      
+      // Exibir o modal
+      const overlay = document.getElementById('curriculo-modal-overlay');
+      overlay.style.display = 'flex';
     } else {
-      showToast('Este candidato não anexou currículo', 'info');
+      showToast('Este candidato não anexou currículo.', 'info');
     }
   } catch (error) {
-    showToast(error.message || 'Erro ao carregar currículo', 'error');
+    console.error('[CURRICULO_ERR]', error);
+    showToast('Erro ao carregar currículo.', 'error');
   }
 }
 
@@ -389,13 +396,29 @@ async function openCandidateModal(id) {
       </div>
 
       <div style="margin-top: var(--space-4);">
-        ${item.curriculo_path ? `
-          <a href="/api/applications/${item.id}/curriculo" download class="btn btn-primary btn-block" style="gap: 8px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Baixar Currículo (PDF)
-          </a>
+        ${item.curriculo_url ? `
+          <div style="display:flex; gap:12px; margin-top: var(--space-3);">
+            <a href="${item.curriculo_url}" target="_blank"
+               style="flex:1; padding:12px; background:#6c3fc5; color:#fff;
+                      border-radius:10px; text-decoration:none; font-weight:600;
+                      font-size:14px; text-align:center; display:block;">
+              👁 Ver Currículo
+            </a>
+            <a href="${item.curriculo_url}?fl_attachment=true" target="_blank"
+               style="flex:1; padding:12px; background:#f0ebff; color:#6c3fc5;
+                      border:2px solid #d0c4f0; border-radius:10px;
+                      text-decoration:none; font-weight:600; font-size:14px;
+                      text-align:center; display:block;">
+              ⬇ Baixar PDF
+            </a>
+          </div>
         ` : `
-          <div style="background: var(--slate-50); color: var(--slate-400); text-align: center; padding: var(--space-3); border-radius: 8px; border: 1px dashed var(--slate-200); font-size: var(--font-sm);">Curriculo não anexado</div>
+          <div style="background:var(--slate-50); color:var(--slate-400);
+                      text-align:center; padding:var(--space-3); border-radius:8px;
+                      border:1px dashed var(--slate-200); font-size:var(--font-sm);
+                      margin-top:var(--space-3);">
+            Currículo não anexado
+          </div>
         `}
       </div>
 
