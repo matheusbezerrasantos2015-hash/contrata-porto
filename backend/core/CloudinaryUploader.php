@@ -30,16 +30,23 @@ class CloudinaryUploader
         $apiKey    = getEnv2('CLOUDINARY_API_KEY');
         $apiSecret = getEnv2('CLOUDINARY_API_SECRET');
 
-        // 3. Parâmetros e assinatura
+        // 3. Parâmetros e assinatura (SHA1, não HMAC)
         $timestamp = time();
         $folder    = 'contrataporto/curriculos';
-        $params    = [
+
+        // Ordenar parâmetros alfabeticamente e concatenar com &
+        $params = [
             'folder'    => $folder,
             'timestamp' => $timestamp,
         ];
         ksort($params);
+
+        // Montar string: "folder=X&timestamp=Y" + apiSecret
         $paramStr  = http_build_query($params, '', '&', PHP_QUERY_RFC3986);
-        $signature = hash_hmac('sha256', $paramStr . $apiSecret, $apiSecret);
+        $toSign    = $paramStr . $apiSecret;
+        
+        // Assinatura correta: SHA1 (não HMAC-SHA256)
+        $signature = sha1($toSign);
 
         // 4. Upload via cURL multipart
         $url  = "https://api.cloudinary.com/v1_1/{$cloudName}/raw/upload";
@@ -57,13 +64,21 @@ class CloudinaryUploader
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => $post,
             CURLOPT_TIMEOUT        => 30,
+            CURLOPT_SSL_VERIFYPEER => true,
         ]);
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
+        if ($curlError) {
+            throw new Exception('Erro de conexão com o storage: ' . $curlError);
+        }
+
         if ($httpCode !== 200) {
-            throw new Exception('Falha ao enviar currículo para o storage. HTTP ' . $httpCode);
+            $decoded = json_decode($response, true);
+            $msg = $decoded['error']['message'] ?? 'HTTP ' . $httpCode;
+            throw new Exception('Falha ao enviar currículo para o storage: ' . $msg);
         }
 
         $data = json_decode($response, true);
