@@ -100,6 +100,14 @@ final class ApplicationController
         }
 
         $applicationId = (int) $db->lastInsertId();
+        if ($applicationId === 0) {
+            $stmtId = $db->prepare('SELECT id FROM applications WHERE user_id = :user_id AND vaga_id = :vaga_id');
+            $stmtId->execute([
+                ':user_id' => $user['id'],
+                ':vaga_id' => $jobId
+            ]);
+            $applicationId = (int) $stmtId->fetchColumn();
+        }
 
         // [APPLY_DEBUG] Adicionando logs para rastreio
         error_log('[APPLY_DEBUG] curriculo_url=' . ($curriculoUrl ?? 'NULL'));
