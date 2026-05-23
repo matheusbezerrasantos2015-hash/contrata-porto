@@ -36,24 +36,29 @@ class CloudinaryUploader
 
         // Ordenar parâmetros alfabeticamente e concatenar com &
         $params = [
-            'folder'    => $folder,
-            'timestamp' => $timestamp,
+            'access_mode' => 'public',
+            'folder'      => $folder,
+            'timestamp'   => $timestamp,
+            'type'        => 'upload',
         ];
-        // Montar a string manualmente sem encoding da barra
-        $paramStr = 'folder=' . $folder . '&timestamp=' . $timestamp;
-        $toSign   = $paramStr . $apiSecret;
-        
+        ksort($params);
+        // Montar a string manualmente sem encoding da barra (ordem alfabética: access_mode, folder, timestamp, type)
+        $paramStr  = 'access_mode=public&folder=' . $folder . '&timestamp=' . $timestamp . '&type=upload';
+        $toSign    = $paramStr . $apiSecret;
+
         // Assinatura correta: SHA1 (não HMAC-SHA256)
         $signature = sha1($toSign);
 
         // 4. Upload via cURL multipart
         $url  = "https://api.cloudinary.com/v1_1/{$cloudName}/raw/upload";
         $post = [
-            'file'      => new CURLFile($file['tmp_name'], 'application/pdf', $file['name']),
-            'api_key'   => $apiKey,
-            'timestamp' => $timestamp,
-            'folder'    => $folder,
-            'signature' => $signature,
+            'file'        => new CURLFile($file['tmp_name'], 'application/pdf', $file['name']),
+            'api_key'     => $apiKey,
+            'timestamp'   => $timestamp,
+            'folder'      => $folder,
+            'access_mode' => 'public',
+            'type'        => 'upload',
+            'signature'   => $signature,
         ];
 
         $ch = curl_init($url);
