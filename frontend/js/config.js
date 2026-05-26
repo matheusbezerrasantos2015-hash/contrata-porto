@@ -2,7 +2,6 @@
 ["api_base_url", "api_url"].forEach((key) => {
   const val = localStorage.getItem(key);
   if (val && !val.startsWith(window.location.origin)) {
-    console.warn("[CONFIG] Removendo URL de origem diferente do localStorage:", val);
     localStorage.removeItem(key);
   }
 });
@@ -24,4 +23,3 @@ if (isProduction) {
 
 export { API_BASE, API_URL };
 
-console.log("[CONFIG] API_URL:", API_URL);

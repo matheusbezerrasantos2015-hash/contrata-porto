@@ -27,6 +27,7 @@ final class UserController
                 $this->user = AuthMiddleware::requireAuth();
             } catch (Exception $e) {
                 Response::error('Não autorizado', 401);
+                return;
             }
         }
 
@@ -35,6 +36,7 @@ final class UserController
         
         if (!$user) {
             Response::error('Usuário não encontrado', 404);
+            return;
         }
 
         Response::success('ok', [
@@ -44,6 +46,8 @@ final class UserController
             'telefone' => $user['telefone'] ?? '',
             'role'     => $user['role'],
         ]);
+
+        return;
     }
 
     /**
@@ -57,6 +61,7 @@ final class UserController
 
         if (empty($nome)) {
             Response::error('O nome não pode ficar vazio.', 400);
+            return;
         }
 
         $db   = Database::getConnection();
@@ -93,6 +98,8 @@ final class UserController
             'telefone' => $telefone,
             'token'    => $token
         ]);
+
+        return;
     }
 
     /**
@@ -107,5 +114,7 @@ final class UserController
         $stmt->execute([$userId]);
 
         Response::success('Conta excluída.');
+
+        return;
     }
 }

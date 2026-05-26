@@ -35,8 +35,10 @@ final class CompanyController
 
         if (!$empresa) {
             Response::error('Empresa não encontrada', 404);
+            return;
         }
         Response::success('ok', $empresa);
+        return;
     }
 
     /**
@@ -50,12 +52,14 @@ final class CompanyController
 
         if (empty($nome_fantasia)) {
             Response::error('O nome da empresa não pode ficar vazio.', 400);
+            return;
         }
 
         $empresaId = $this->user['empresa_id'] ?? null;
         
         if (!$empresaId) {
             Response::error('ID da empresa não encontrado no token.', 400);
+            return;
         }
 
         $db   = Database::getConnection();
@@ -86,6 +90,8 @@ final class CompanyController
             'telefone'      => $telefone,
             'token'         => $token
         ]);
+
+        return;
     }
 
     /**
@@ -100,6 +106,8 @@ final class CompanyController
         $stmt->execute([$userId]);
 
         Response::success('Conta excluída.');
+
+        return;
     }
 
     /**
@@ -114,7 +122,9 @@ final class CompanyController
         $company = $this->companyModel->findById($id);
         if (!$company) {
             Response::error('Not Found', 404);
+            return;
         }
         Response::success('Empresa encontrada', $company);
+        return;
     }
 }

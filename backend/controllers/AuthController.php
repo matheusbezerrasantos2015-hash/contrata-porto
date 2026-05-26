@@ -25,8 +25,9 @@ final class AuthController
     public function register(): void
     {
         $ip = Request::ip();
-        if (!RateLimiter::hit('register:' . $ip, 1000, 300)) {
+        if (!RateLimiter::hit('register:' . $ip, 5, 300)) {
             Response::json(false, "Muitas tentativas de cadastro.", null, 429);
+            return;
         }
 
         $input = Request::json();
@@ -37,15 +38,18 @@ final class AuthController
 
         if (!in_array($role, ['CANDIDATO', 'EMPRESA'], true)) {
             Response::json(false, "Perfil de usuário inválido.", null, 422);
+            return;
         }
 
         // Regra: se algum estiver vazio (ou nulo)
         if ($nome === '' || $email === '' || $senha === '') {
             Response::json(false, "Preencha todos os campos obrigatórios", null, 400);
+            return;
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($senha) < 8) {
             Response::json(false, "Dados inválidos: e-mail malformado ou senha muito curta.", null, 422);
+            return;
         }
 
         $companyData = [];
@@ -53,6 +57,7 @@ final class AuthController
             $company = $input['company'] ?? [];
             if (empty($company['nome_fantasia']) || empty($company['razao_social']) || empty($company['cnpj'])) {
                 Response::json(false, "Preencha os dados da empresa (nome fantasia, razão social e cnpj).", null, 400);
+                return;
             }
             $companyData = [
                 'nome_fantasia' => $company['nome_fantasia'],
@@ -68,6 +73,7 @@ final class AuthController
 
         if ($this->userModel->findByEmail($email) !== null) {
             Response::json(false, "Email já cadastrado", null, 409);
+            return;
         }
 
         try {
@@ -79,7 +85,7 @@ final class AuthController
             $stmt = $db->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
             $stmt->execute([$userId, $code]);
 
-            error_log("[EMAIL_VERIFY] Código gerado para {$email}: {$code}");
+            error_log("[EMAIL_VERIFY] Código enviado para {$email}");
 
             // Captura dados para o e-mail diferido
             $emailPayload = [
@@ -106,16 +112,20 @@ final class AuthController
             });
 
             Response::json(true, "Cadastro realizado com sucesso. Verifique seu e-mail para confirmar a conta.", ['id' => $userId, 'requires_verification' => true], 201);
+
+            return;
         } catch (\Exception $e) {
             Response::json(false, "Erro ao cadastrar: " . $e->getMessage(), null, 500);
+            return;
         }
     }
 
     public function login(): void
     {
         $ip = Request::ip();
-        if (!RateLimiter::hit('login:' . $ip, 1000, 300)) {
-            Response::json(false, "Sua conta foi temporariamente bloqueada após 3 tentativas inválidas. Tente novamente em 5 minutos.", null, 429);
+        if (!RateLimiter::hit('login:' . $ip, 10, 300)) {
+            Response::json(false, "Muitas tentativas. Aguarde 5 minutos antes de tentar novamente.", null, 429);
+            return;
         }
 
         $input = Request::json();
@@ -124,17 +134,20 @@ final class AuthController
 
         if ($email === '' || $senha === '') {
             Response::json(false, "Preencha todos os campos obrigatórios", null, 400);
+            return;
         }
 
         // Verifica se usuário existe antes de tentar login para retornar 404
         $user = $this->userModel->findByEmail($email);
         if ($user === null) {
             Response::json(false, "Usuário não encontrado", null, 404);
+            return;
         }
 
         $auth = $this->authService->login($email, $senha);
         if (!$auth) {
             Response::json(false, "Unauthorized", null, 401);
+            return;
         }
 
         // Verifica se o e-mail está confirmado
@@ -143,6 +156,7 @@ final class AuthController
                 'requires_verification' => true,
                 'email' => $email
             ], 403);
+            return;
         }
 
         Response::json(true, "Login realizado com sucesso", [
@@ -156,6 +170,8 @@ final class AuthController
             ],
             'auth' => ['type' => 'bearer', 'token' => $auth['token']],
         ], 200);
+
+        return;
     }
 
     public function forgotPassword(): void
@@ -165,6 +181,7 @@ final class AuthController
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             Response::error('E-mail inválido.', 422);
+            return;
         }
 
         $user = $this->userModel->findByEmail($email);
@@ -198,6 +215,7 @@ final class AuthController
 
         // Retorna sucesso mesmo se não encontrar para segurança
         Response::success('Se o e-mail estiver cadastrado, você receberá o link.');
+        return;
     }
 
     public function resetPassword(): void
@@ -208,6 +226,7 @@ final class AuthController
 
         if (strlen($nova_senha) < 6) {
             Response::error('A senha deve ter pelo menos 6 caracteres.', 400);
+            return;
         }
 
         $db = Database::getConnection();
@@ -224,6 +243,7 @@ final class AuthController
 
         if (!$reset) {
             Response::error('Link inválido ou expirado. Solicite um novo.', 400);
+            return;
         }
 
         $userId = (int) $reset['user_id'];
@@ -236,6 +256,8 @@ final class AuthController
         $delStmt->execute([$token]);
 
         Response::success('Senha alterada com sucesso! Faça login com a nova senha.');
+
+        return;
     }
 
     public function logout(): void
@@ -244,6 +266,8 @@ final class AuthController
         // No backend revocation needed for stateless JWT in this step
 
         Response::json(true, "Logout realizado com sucesso", null, 200);
+
+        return;
     }
 
     public function verifyEmail(): void
@@ -254,15 +278,18 @@ final class AuthController
 
         if ($email === '' || $code === '') {
             Response::json(false, "Dados insuficientes.", null, 400);
+            return;
         }
 
         $user = $this->userModel->findByEmail($email);
         if (!$user) {
             Response::json(false, "Usuário não encontrado.", null, 404);
+            return;
         }
 
         if ((int)$user['email_verified'] === 1) {
             Response::json(true, "E-mail já verificado.", null, 200);
+            return;
         }
 
         $db = Database::getConnection();
@@ -276,6 +303,7 @@ final class AuthController
 
         if (!$verification) {
             Response::json(false, "Código inválido ou expirado.", null, 400);
+            return;
         }
 
         try {
@@ -322,9 +350,12 @@ final class AuthController
                 'auth' => ['type' => 'bearer', 'token' => $token],
             ], 200);
 
+            return;
+
         } catch (Exception $e) {
             $db->rollBack();
             Response::json(false, "Erro ao verificar e-mail.", null, 500);
+            return;
         }
     }
 
@@ -335,21 +366,25 @@ final class AuthController
 
         if ($email === '') {
             Response::json(false, "E-mail é obrigatório.", null, 400);
+            return;
         }
 
         // Rate limit para reenvio
         $ip = Request::ip();
-        if (!RateLimiter::hit('resend_verification:' . $ip, 600, 3)) {
+        if (!RateLimiter::hit('resend_verification:' . $ip, 3, 600)) {
             Response::json(false, "Muitas solicitações. Tente novamente em 10 minutos.", null, 429);
+            return;
         }
 
         $user = $this->userModel->findByEmail($email);
         if (!$user) {
             Response::json(false, "Usuário não encontrado.", null, 404);
+            return;
         }
 
         if ((int)$user['email_verified'] === 1) {
             Response::json(false, "Este e-mail já está verificado.", null, 400);
+            return;
         }
 
         $db = Database::getConnection();
@@ -361,7 +396,7 @@ final class AuthController
         $stmt = $db->prepare('INSERT INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))');
         $stmt->execute([$user['id'], $code]);
 
-        error_log("[EMAIL_VERIFY] Código gerado para {$email}: {$code}");
+        error_log("[EMAIL_VERIFY] Código enviado para {$email}");
 
         $emailPayload = [
             'email' => $email,
@@ -383,5 +418,7 @@ final class AuthController
         });
 
         Response::json(true, "Novo código enviado para o seu e-mail.");
+
+        return;
     }
 }

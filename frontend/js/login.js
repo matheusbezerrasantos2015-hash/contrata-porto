@@ -21,21 +21,17 @@ form.addEventListener('submit', async (event) => {
   setButtonLoading(submitBtn, true, 'Entrando...');
   try {
     const result = await withGlobalLoader(() => login({ email, senha }));
-    console.log("[LOGIN RESPONSE COMPLETA]", result);
 
     // Caminho confirmado: result = { success, message, data: { auth: { token }, usuario: { id, role } } }
     const token = result?.data?.auth?.token || null;
     
     if (!token || token.length < 20) {
-      console.error("❌ Token inválido ou não encontrado", result);
       alert("Erro de autenticação: token não recebido corretamente");
       setButtonLoading(submitBtn, false);
       return;
     }
     
     localStorage.setItem("token", token);
-    console.log("✅ Token salvo com sucesso:", token);
-    console.log("[TOKEN NO STORAGE]", localStorage.getItem("token"));
     
     const user = result?.data?.usuario || {};
     localStorage.setItem('user_id', String(user.id || ''));
@@ -54,7 +50,6 @@ form.addEventListener('submit', async (event) => {
 
     window.location.href = user.role === 'empresa' ? './dashboard.html' : './candidate-dashboard.html';
   } catch (error) {
-    console.log("[LOGIN ERROR HANDLER]", error);
 
     // Trata caso de e-mail não verificado (HTTP 403)
     if (error.status === 403 && error.payload && error.payload.data && error.payload.data.requires_verification) {

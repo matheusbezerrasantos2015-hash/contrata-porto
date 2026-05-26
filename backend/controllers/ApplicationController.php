@@ -307,23 +307,14 @@ final class ApplicationController
             Response::json(false, 'Acesso negado para este currículo.', null, 403);
         }
 
-        $enriched = $this->applicationModel->findByIdEnriched($id);
-        $filePath = $enriched['curriculo_path'] ?? null;
+        $url = $application['curriculo_url'] ?? null;
 
-        if (!$filePath) {
-            Response::json(false, 'Esta candidatura não possui currículo anexado.', null, 404);
+        if (empty($url)) {
+            Response::json(false, 'Esta candidatura não possui currículo.', null, 404);
         }
 
-        $fullPath = __DIR__ . '/../' . $filePath;
-
-        if (!file_exists($fullPath)) {
-            Response::json(false, 'Arquivo do currículo não encontrado no servidor.', null, 404);
-        }
-
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="curriculo_' . $id . '.pdf"');
-        header('Content-Length: ' . filesize($fullPath));
-        readfile($fullPath);
+        http_response_code(302);
+        header('Location: ' . $url);
         exit;
     }
 }

@@ -86,7 +86,6 @@ btnVerify.addEventListener('click', async () => {
         });
 
         const json = await res.json();
-        console.log('[VERIFY_API_RESPONSE]:', json);
         
         if (!res.ok) throw new Error(json.message || 'Erro ao verificar código.');
 
@@ -121,7 +120,6 @@ resendLink.addEventListener('click', async () => {
         });
 
         const json = await res.json();
-        console.log('[RESEND_API_RESPONSE]:', json);
 
         if (!res.ok) throw new Error(json.message);
 

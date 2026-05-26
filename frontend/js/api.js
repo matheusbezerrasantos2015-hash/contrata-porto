@@ -62,7 +62,6 @@ export function normalizeApiResponse(response) {
 
 export function getAuthHeaders() {
   const token = localStorage.getItem('token');
-  console.log('[AUTH TOKEN]', token);
 
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -71,7 +70,6 @@ export function getAuthHeaders() {
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`;
-  console.log('[API] CALL:', url);
 
   const isFormData = options.body instanceof FormData;
   const headers = {
@@ -84,7 +82,7 @@ async function request(path, options = {}) {
     ...options,
     headers
   }).catch(err => {
-    console.error("[FETCH ERROR]", err);
+    console.error('[REDE] Falha na requisição');
     throw err;
   });
 
@@ -92,14 +90,12 @@ async function request(path, options = {}) {
   const payload = contentType.includes('application/json') ? await response.json() : null;
 
   if (payload && !payload.success) {
-    console.error('[API ERROR]', payload?.message);
   }
 
   if (!response.ok) {
     const message = payload?.message || `Erro HTTP ${response.status}`;
 
     if (response.status === 401 && localStorage.getItem('token') && !window.location.pathname.includes('login')) {
-      console.warn('[AUTH] Sessão expirada ou inválida. Limpando credenciais.');
       localStorage.removeItem('token');
       localStorage.removeItem('user_id');
       localStorage.removeItem('user_role');

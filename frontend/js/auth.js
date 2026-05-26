@@ -58,7 +58,6 @@ export function requireAuth({ role } = {}) {
   const auth = getAuthState();
 
   if (!auth.token) {
-    console.warn("[AUTH] Token não encontrado — redirecionando para login");
     window.location.href = new URL('./login.html', window.location.href).toString();
     return null;
   }
@@ -85,7 +84,6 @@ export function redirectIfAuthenticated() {
                        path.includes('explorar.html');
 
   if (isPublicPage) {
-    console.log("[AUTH] Public page detected, skipping auto-redirect: ", path);
     return;
   }
 
