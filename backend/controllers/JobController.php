@@ -52,12 +52,15 @@ final class JobController
         $sql = "SELECT v.*, e.nome_fantasia AS empresa_nome 
                 FROM vagas v 
                 INNER JOIN empresas e ON e.id = v.empresa_id 
-                WHERE v.status = 'ATIVA' 
+                WHERE v.status = :status 
                 ORDER BY v.publicada_em DESC 
-                LIMIT 6 OFFSET {$offset}";
+                LIMIT 6 OFFSET :offset";
         
-        $stmt = $db->query($sql);
-        $vagas = $stmt->fetchAll();
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':status', 'ATIVA', PDO::PARAM_STR);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $vagas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Query para contar total
         $sqlTotal = "SELECT COUNT(*) as total FROM vagas WHERE status = 'ATIVA'";

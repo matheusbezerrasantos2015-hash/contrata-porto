@@ -49,8 +49,8 @@ function renderPagination(p) {
 
   // Indicador de página
   html += `<span class="page-info">
-             Página ${p.page} de ${p.total_pages}
-             <small>(${p.total} vagas encontradas)</small>
+             Página ${escapeHTML(String(p.page))} de ${escapeHTML(String(p.total_pages))}
+             <small>(${escapeHTML(String(p.total))} vagas encontradas)</small>
            </span>`;
 
   // Botão próxima

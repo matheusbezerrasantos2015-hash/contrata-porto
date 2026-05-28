@@ -3,3 +3,10 @@
 .env.production
 vendor/
 uploads/
+backend/logs/
+*.log
+diag.php
+teste.php
+debug_*.php
+seed.php
+*.sql.bak

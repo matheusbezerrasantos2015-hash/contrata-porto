@@ -2,6 +2,15 @@
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $file = __DIR__ . $uri;
 
+// Segurança: bloquear execução de PHP em uploads
+if (strpos($uri, '/uploads/') !== false && 
+    pathinfo($uri, PATHINFO_EXTENSION) === 'php') {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Forbidden']);
+    exit;
+}
+
 // 1. Se o arquivo físico existe (css, js, imagens), serve ele direto
 if ($uri !== '/' && file_exists($file)) {
     return false;
