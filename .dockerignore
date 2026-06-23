@@ -1,16 +1,31 @@
 # Secrets e variáveis de ambiente
 .env
-.env.local
+.env.*
+.env.example
 
 # Git
 .git
 .gitignore
 
-# Uploads (efêmeros de qualquer forma)
-uploads/
+# PHP / Composer
+vendor/
+composer.lock
 
-# Logs
+# Node / JS
+node_modules/
+npm-debug.log
+
+# Legacy/Unneeded directories for API production build
+backend_legacy/
+database_legacy/
+frontend/
+uploads/
+tests/
+
+# Logs e Cache
 *.log
+storage/logs/*.log
+bootstrap/cache/*.php
 
 # Documentação
 *.md
