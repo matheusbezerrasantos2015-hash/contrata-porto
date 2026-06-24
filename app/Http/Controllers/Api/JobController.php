@@ -73,7 +73,7 @@ class JobController extends Controller
         $page    = (int) $request->query('page', 1);
 
         $paginator = JobListing::with('company')
-            ->where('company_id', $company->id)
+            ->where(JobListing::companyForeignKey(), $company->id)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 

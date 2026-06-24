@@ -7,16 +7,18 @@ import Input from '@/components/Input'
 import Select from '@/components/Select'
 import Button from '@/components/Button'
 import Modal from '@/components/Modal'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const ESTADOS = [
+  { value: 'SP', label: 'São Paulo' },
   { value: 'RS', label: 'Rio Grande do Sul' },
   { value: 'SC', label: 'Santa Catarina' },
   { value: 'PR', label: 'Paraná' },
-  { value: 'SP', label: 'São Paulo' },
   { value: 'RJ', label: 'Rio de Janeiro' },
 ]
 
 export default function CandidatoSettings() {
+  useDocumentTitle('Configurações do Candidato')
   const { user, updateUser, updateToken, logout } = useAuth()
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
 
@@ -217,7 +219,7 @@ export default function CandidatoSettings() {
             <Input
               label="Cidade"
               type="text"
-              placeholder="Porto Alegre"
+              placeholder="Porto Ferreira, SP"
               leftIcon={<MapPin className="w-4 h-4" />}
               error={errors.cidade?.message}
               {...register('cidade')}

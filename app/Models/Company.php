@@ -6,17 +6,33 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 
 class Company extends Model
 {
     use HasFactory;
 
     /**
-     * The table associated with the model.
-     *
-     * @var string
+     * Resolve a tabela em runtime para compatibilidade com bancos legados (empresas).
      */
-    protected $table = 'companies';
+    public function getTable(): string
+    {
+        static $resolved = null;
+
+        if ($resolved !== null) {
+            return $resolved;
+        }
+
+        if (Schema::hasTable('companies')) {
+            $resolved = 'companies';
+        } elseif (Schema::hasTable('empresas')) {
+            $resolved = 'empresas';
+        } else {
+            $resolved = 'companies';
+        }
+
+        return $resolved;
+    }
 
     /**
      * The attributes that are mass assignable.

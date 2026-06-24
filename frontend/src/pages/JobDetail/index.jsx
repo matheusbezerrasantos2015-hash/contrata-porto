@@ -32,6 +32,7 @@ import {
   jobStatusVariant,
   getStatusLabel,
 } from '@/utils/formatters'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function JobDetail() {
   const { id } = useParams()
@@ -51,6 +52,8 @@ export default function JobDetail() {
   const [selectedFile, setSelectedFile] = useState(null)
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
+
+  useDocumentTitle(job?.titulo ?? 'Detalhes da Vaga')
 
   useEffect(() => {
     setLoading(true)
@@ -182,7 +185,7 @@ export default function JobDetail() {
                 <div>
                   <p className="text-xs text-slate-400 font-medium uppercase">Cidade</p>
                   <p className="text-sm font-semibold text-slate-700 truncate">
-                    {job.modalidade === 'remoto' ? 'Remoto' : (job.cidade ?? 'Porto Alegre')}
+                    {job.modalidade === 'remoto' ? 'Remoto' : (job.cidade ?? 'Porto Ferreira, SP')}
                   </p>
                 </div>
               </div>

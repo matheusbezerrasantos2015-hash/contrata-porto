@@ -2,8 +2,10 @@ import { useFavorites } from '@/hooks/useFavorites'
 import { Heart, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import JobCard from '@/components/JobCard'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function Favorites() {
+  useDocumentTitle('Favoritos')
   const { favorites, loading } = useFavorites()
 
   return (

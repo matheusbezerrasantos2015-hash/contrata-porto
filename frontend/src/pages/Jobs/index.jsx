@@ -7,7 +7,7 @@ import JobCard from '@/components/JobCard'
 import Input from '@/components/Input'
 import Select from '@/components/Select'
 import Button from '@/components/Button'
-import EmptyState from '@/components/EmptyState'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const AREAS = [
   'Tecnologia da Informação',
@@ -47,6 +47,7 @@ const MODALIDADES = [
 ]
 
 export default function Jobs() {
+  useDocumentTitle('Vagas')
   const [searchParams, setSearchParams] = useSearchParams()
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
@@ -120,7 +121,7 @@ export default function Jobs() {
       {/* Header busca principal */}
       <div className="bg-primary-900 rounded-2xl p-6 sm:p-8 text-white mb-8 border border-primary-800 shadow-md">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Encontre sua oportunidade</h1>
-        <p className="text-primary-200 text-sm mb-6">Busque por cargos, empresas, áreas ou cidades da região metropolitana.</p>
+        <p className="text-primary-200 text-sm mb-6">Busque por cargos, empresas, áreas ou cidades de Porto Ferreira, SP e região.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-white p-2 rounded-xl border border-surface-200">
           <div className="md:col-span-6 flex items-center px-3 gap-2 border-b md:border-b-0 md:border-r border-surface-200 pb-2 md:pb-0">

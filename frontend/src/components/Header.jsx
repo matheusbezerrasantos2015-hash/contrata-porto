@@ -1,5 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { LogOut, User, Building2, Briefcase, Heart, Menu, X, ChevronDown, LayoutDashboard, Settings } from 'lucide-react'
+import { LogOut, User, Building2, Heart, Menu, X, ChevronDown, LayoutDashboard, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getInitials } from '@/utils/formatters'
@@ -31,13 +31,17 @@ export default function Header() {
       <div className="page-wrapper">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 no-underline group">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow">
-              <Briefcase className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-primary-600 text-lg leading-none tracking-tight hidden sm:block">
-              Contrata<span className="text-accent-500">Porto</span>
-            </span>
+          <Link to="/" className="flex items-center gap-2.5 no-underline group">
+            <img
+              src="/favicon.png"
+              alt=""
+              className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-surface-200"
+            />
+            <img
+              src="/logo.png"
+              alt="ContrataPorto"
+              className="h-9 w-auto object-contain hidden sm:block"
+            />
           </Link>
 
           {/* Nav desktop */}

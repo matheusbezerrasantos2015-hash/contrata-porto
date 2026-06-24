@@ -1,21 +1,25 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Briefcase, Building2, Search, ArrowRight, CheckCircle2, MapPin } from 'lucide-react'
+import { Briefcase, Search, ArrowRight, CheckCircle2, MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import * as jobsApi from '@/api/jobs'
 import JobCard from '@/components/JobCard'
 import Spinner from '@/components/Spinner'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const CIDADES = [
-  'Porto Alegre',
-  'Canoas',
-  'Gravataí',
-  'Novo Hamburgo',
-  'Viamão',
-  'São Leopoldo',
-  'Alvorada',
+  'Porto Ferreira',
+  'Piracicaba',
+  'Santa Rosa de Viterbo',
+  'Santa Cruz das Palmeiras',
+  'Saltinho',
+  'Araras',
+  'Rio Claro',
+  'São Pedro',
 ]
 
 export default function Home() {
+  useDocumentTitle(null)
+
   const [featuredJobs, setFeaturedJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -52,10 +56,10 @@ export default function Home() {
         <div className="page-wrapper relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary-700/60 border border-primary-600 text-primary-200 mb-6 animate-fade-in">
-              🚀 A plataforma de empregos oficial de Porto Alegre
+              🚀 A plataforma de empregos oficial de Porto Ferreira, SP
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white text-balance leading-tight">
-              Conectando você às melhores vagas de <span className="text-accent-400">Porto Alegre</span>
+              Conectando você às melhores vagas de <span className="text-accent-400">Porto Ferreira, SP</span>
             </h1>
             <p className="mt-6 text-lg text-primary-200 text-balance max-w-2xl mx-auto">
               Seja você um profissional buscando novos desafios ou uma empresa procurando o talento perfeito. Nosso porto é o seu ponto de partida.
@@ -95,26 +99,6 @@ export default function Home() {
                 Buscar vagas
               </button>
             </form>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="bg-white py-12 border-b border-surface-200">
-        <div className="page-wrapper">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-            <div className="p-6">
-              <p className="text-4xl font-extrabold text-primary-600">500+</p>
-              <p className="mt-2 text-sm font-medium text-slate-500">Vagas Ativas</p>
-            </div>
-            <div className="p-6 border-y sm:border-y-0 sm:border-x border-surface-200">
-              <p className="text-4xl font-extrabold text-primary-600">120+</p>
-              <p className="mt-2 text-sm font-medium text-slate-500">Empresas Parceiras</p>
-            </div>
-            <div className="p-6">
-              <p className="text-4xl font-extrabold text-primary-600">10k+</p>
-              <p className="mt-2 text-sm font-medium text-slate-500">Candidatos Contratados</p>
-            </div>
           </div>
         </div>
       </section>
@@ -163,7 +147,7 @@ export default function Home() {
                 Por que escolher o ContrataPorto?
               </h2>
               <p className="text-slate-600 mt-4 leading-relaxed">
-                Nós facilitamos a conexão entre talentos locais e empresas inovadoras na região metropolitana de Porto Alegre, focando na agilidade e transparência do processo de contratação.
+                Nós facilitamos a conexão entre talentos locais e empresas inovadoras em Porto Ferreira, SP e região, focando na agilidade e transparência do processo de contratação.
               </p>
 
               <ul className="mt-8 space-y-3">

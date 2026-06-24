@@ -6,7 +6,10 @@ import { Mail, Lock, AlertCircle } from 'lucide-react'
 import Input from '@/components/Input'
 import Button from '@/components/Button'
 
+import useDocumentTitle from '@/hooks/useDocumentTitle'
+
 export default function Login() {
+  useDocumentTitle('Entrar')
   const { login, isAuthenticated, userType } = useAuth()
   const { register, handleSubmit, formState: { errors } } = useForm()
   const [loading, setLoading] = useState(false)

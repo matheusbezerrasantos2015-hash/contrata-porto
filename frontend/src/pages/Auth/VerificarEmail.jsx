@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { Mail, CheckCircle2, AlertCircle } from 'lucide-react'
 import Input from '@/components/Input'
 import Button from '@/components/Button'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function VerificarEmail() {
+  useDocumentTitle('Verificar E-mail')
   const [searchParams] = useSearchParams()
   const email = searchParams.get('email') ?? ''
   const { register, handleSubmit, formState: { errors } } = useForm({

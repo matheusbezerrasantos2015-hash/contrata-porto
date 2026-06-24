@@ -25,6 +25,7 @@ import {
   getStatusColor,
   formatDate,
 } from '@/utils/formatters'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 const AREAS = [
   'Tecnologia da Informação',
@@ -64,6 +65,7 @@ const MODALIDADES = [
 ]
 
 export default function EmpresaDashboard() {
+  useDocumentTitle('Minhas Vagas')
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
@@ -257,7 +259,7 @@ export default function EmpresaDashboard() {
         <EmptyState
           icon={<Briefcase className="w-12 h-12 text-slate-300 animate-pulse" />}
           title="Sua empresa ainda não possui vagas"
-          description="Comece agora mesmo a publicar anúncios de emprego para profissionais qualificados em Porto Alegre."
+          description="Comece agora mesmo a publicar anúncios de emprego para profissionais qualificados em Porto Ferreira, SP."
           action={
             <Button onClick={handleOpenCreate} variant="primary">
               Publicar Primeira Vaga
@@ -423,7 +425,7 @@ export default function EmpresaDashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Cidade"
-              placeholder="Ex: Porto Alegre"
+              placeholder="Ex: Porto Ferreira, SP"
               error={errors.cidade?.message}
               {...register('cidade')}
             />

@@ -10,8 +10,10 @@ import {
   getStatusLabel,
   getStatusColor,
 } from '@/utils/formatters'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function CandidatoDashboard() {
+  useDocumentTitle('Minhas Candidaturas')
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

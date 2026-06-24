@@ -8,18 +8,33 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 
 class JobListing extends Model
 {
     use HasFactory;
 
     /**
-     * The table associated with the model.
-     * Named 'job_listings' to avoid conflict with Laravel's built-in 'jobs' queue table.
-     *
-     * @var string
+     * Resolve a tabela em runtime para compatibilidade com bancos legados (vagas).
      */
-    protected $table = 'job_listings';
+    public function getTable(): string
+    {
+        static $resolved = null;
+
+        if ($resolved !== null) {
+            return $resolved;
+        }
+
+        if (Schema::hasTable('job_listings')) {
+            $resolved = 'job_listings';
+        } elseif (Schema::hasTable('vagas')) {
+            $resolved = 'vagas';
+        } else {
+            $resolved = 'job_listings';
+        }
+
+        return $resolved;
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -78,9 +93,25 @@ class JobListing extends Model
         ];
     }
 
-    // ─────────────────────────────────────────
-    // Accessors
-    // ─────────────────────────────────────────
+    /**
+     * Retorna o nome da coluna de FK para empresa (legado: empresa_id).
+     */
+    public static function companyForeignKey(): string
+    {
+        $instance = new static();
+
+        return Schema::hasColumn($instance->getTable(), 'empresa_id') ? 'empresa_id' : 'company_id';
+    }
+
+    /**
+     * Accessor unificado para company_id independente do nome da coluna no banco.
+     */
+    public function getCompanyIdAttribute(): ?int
+    {
+        $key = static::companyForeignKey();
+
+        return isset($this->attributes[$key]) ? (int) $this->attributes[$key] : null;
+    }
 
     /**
      * Accessor de compatibilidade para tipo_contrato.
@@ -115,11 +146,20 @@ class JobListing extends Model
      */
     public function scopeAtivas(Builder $query): Builder
     {
-        return $query->where('ativo', true)
-                     ->where(function (Builder $q) {
-                          $q->whereNull('expires_at')
-                            ->orWhere('expires_at', '>', now());
-                      });
+        $table = (new static)->getTable();
+
+        if (Schema::hasColumn($table, 'ativo')) {
+            $query->where('ativo', true);
+        }
+
+        if (Schema::hasColumn($table, 'expires_at')) {
+            $query->where(function (Builder $q) {
+                $q->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -155,7 +195,9 @@ class JobListing extends Model
      */
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        $foreignKey = Schema::hasColumn($this->getTable(), 'empresa_id') ? 'empresa_id' : 'company_id';
+
+        return $this->belongsTo(Company::class, $foreignKey);
     }
 
     /**

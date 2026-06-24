@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { Lock, CheckCircle2, AlertCircle } from 'lucide-react'
 import Input from '@/components/Input'
 import Button from '@/components/Button'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function ResetSenha() {
+  useDocumentTitle('Redefinir Senha')
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') ?? ''
   const { register, handleSubmit, watch, formState: { errors } } = useForm()

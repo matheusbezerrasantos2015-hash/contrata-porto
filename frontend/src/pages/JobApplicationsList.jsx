@@ -23,8 +23,10 @@ import {
   formatApplicationStatus,
   applicationStatusVariant,
 } from '@/utils/formatters'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function JobApplicationsList() {
+  useDocumentTitle('Candidaturas da Vaga')
   const { id: jobId } = useParams()
   const navigate = useNavigate()
 

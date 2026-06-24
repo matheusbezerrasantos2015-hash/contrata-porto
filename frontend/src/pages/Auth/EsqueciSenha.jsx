@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { KeyRound, CheckCircle2, AlertCircle } from 'lucide-react'
 import Input from '@/components/Input'
 import Button from '@/components/Button'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function EsqueciSenha() {
+  useDocumentTitle('Esqueci a Senha')
   const { register, handleSubmit, formState: { errors } } = useForm()
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')

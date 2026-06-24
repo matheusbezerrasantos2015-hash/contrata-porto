@@ -7,8 +7,10 @@ import Input from '@/components/Input'
 import Button from '@/components/Button'
 import Modal from '@/components/Modal'
 import Spinner from '@/components/Spinner'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function EmpresaSettings() {
+  useDocumentTitle('Configurações da Empresa')
   const { updateToken, logout } = useAuth()
   const { register, handleSubmit, formState: { errors }, reset } = useForm()
 

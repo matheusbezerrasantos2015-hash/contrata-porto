@@ -70,7 +70,7 @@ class JobService
         }
 
         if (!empty($filters['empresa_id'])) {
-            $query->where('company_id', (int) $filters['empresa_id']);
+            $query->where(JobListing::companyForeignKey(), (int) $filters['empresa_id']);
         }
 
         return $query->orderBy('created_at', 'desc')
@@ -87,7 +87,7 @@ class JobService
     public function createForCompany(array $data, int $companyId): JobListing
     {
         return JobListing::create([
-            'company_id'    => $companyId,
+            JobListing::companyForeignKey() => $companyId,
             'titulo'        => $data['titulo'],
             'cargo'         => $data['cargo'] ?? null,
             'area'          => $data['area'] ?? null,

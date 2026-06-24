@@ -5,8 +5,10 @@ import { useState } from 'react'
 import { User, Mail, Lock, Building2, FileText, Phone, AlertCircle } from 'lucide-react'
 import Input from '@/components/Input'
 import Button from '@/components/Button'
+import useDocumentTitle from '@/hooks/useDocumentTitle'
 
 export default function Cadastro() {
+  useDocumentTitle('Cadastro')
   const [searchParams] = useSearchParams()
   const [role, setRole] = useState(() => {
     const queryRole = searchParams.get('role')
