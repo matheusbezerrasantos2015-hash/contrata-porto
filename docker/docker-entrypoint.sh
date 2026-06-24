@@ -12,18 +12,18 @@ echo "Setting permissions for storage and bootstrap/cache..."
 chown -R www-data:www-data /app/storage /app/bootstrap/cache
 chmod -R 775 /app/storage /app/bootstrap/cache
 
-# Executar migrações
+# Executar migrações (se falhar, apenas avisa e continua para não quebrar a inicialização do container)
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force || echo "WARNING: Database migrations failed! Please check DB environment variables."
 
 # Criar link simbólico do storage
 echo "Linking storage..."
-php artisan storage:link --force
+php artisan storage:link --force || echo "WARNING: storage:link failed."
 
-# Cache de configurações e rotas (melhora performance em produção)
+# Cache de configurações e rotas
 echo "Caching config and routes..."
-php artisan config:cache
-php artisan route:cache
+php artisan config:cache || echo "WARNING: config:cache failed."
+php artisan route:cache || echo "WARNING: route:cache failed."
 
 # Iniciar o PHP-FPM em background
 echo "Starting PHP-FPM..."
