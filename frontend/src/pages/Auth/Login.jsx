@@ -48,9 +48,9 @@ export default function Login() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-card border border-surface-200 p-8">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-card border border-surface-200 p-6 sm:p-8">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-primary-600 font-sans">Acesse sua conta</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary-600 font-sans">Acesse sua conta</h2>
           <p className="text-slate-500 text-sm mt-2">
             Insira suas credenciais para continuar no ContrataPorto.
           </p>
@@ -81,7 +81,7 @@ export default function Login() {
           />
 
           <div>
-            <div className="flex justify-between items-center mb-1.5">
+            <div className="flex flex-wrap justify-between items-center gap-x-2 gap-y-1 mb-1.5">
               <label className="text-sm font-medium text-slate-700">Senha</label>
               <Link to="/esqueci-senha" className="text-xs text-primary-600 hover:text-primary-700 no-underline font-semibold">
                 Esqueceu a senha?

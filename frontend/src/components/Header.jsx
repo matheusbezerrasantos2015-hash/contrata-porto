@@ -75,7 +75,7 @@ export default function Header() {
                 <button
                   id="user-menu-btn"
                   onClick={() => setUserMenuOpen((o) => !o)}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-surface-100 transition-colors"
+                  className="flex items-center gap-2 px-2 py-2 sm:py-1.5 rounded-xl hover:bg-surface-100 transition-colors min-h-[44px]"
                   aria-haspopup="true"
                   aria-expanded={userMenuOpen}
                 >
@@ -144,7 +144,7 @@ export default function Header() {
 
             {/* Hamburger mobile */}
             <button
-              className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-surface-100 transition-colors"
+              className="md:hidden tap-target p-2 rounded-lg text-slate-600 hover:bg-surface-100 transition-colors"
               onClick={() => setMobileOpen((o) => !o)}
               aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
             >

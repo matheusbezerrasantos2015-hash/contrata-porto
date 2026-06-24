@@ -15,7 +15,7 @@ export default function EmptyState({
   action,
 }) {
   return (
-    <div className="card p-12 text-center bg-white max-w-xl mx-auto w-full flex flex-col items-center justify-center border border-surface-200">
+    <div className="card p-6 sm:p-12 text-center bg-white max-w-xl mx-auto w-full flex flex-col items-center justify-center border border-surface-200">
       <div className="mb-4 text-slate-300">
         {icon}
       </div>

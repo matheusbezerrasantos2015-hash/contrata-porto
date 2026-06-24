@@ -58,12 +58,12 @@ export default function VerificarEmail() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-card border border-surface-200 p-8">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-card border border-surface-200 p-6 sm:p-8">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <Mail className="w-6 h-6" />
           </div>
-          <h2 className="text-3xl font-bold text-primary-600 font-sans">Verifique seu e-mail</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary-600 font-sans">Verifique seu e-mail</h2>
           <p className="text-slate-500 text-sm mt-2">
             Insira o e-mail cadastrado e o código de 6 dígitos que enviamos para você.
           </p>

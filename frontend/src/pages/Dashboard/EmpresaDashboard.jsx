@@ -271,11 +271,11 @@ export default function EmpresaDashboard() {
           {jobs.map((job) => (
             <article
               key={job.id}
-              className="card p-6 bg-white flex flex-col md:flex-row md:items-center justify-between gap-6 border border-surface-200 shadow-card"
+              className="card p-6 bg-white flex flex-col lg:flex-row lg:items-center justify-between gap-6 border border-surface-200 shadow-card"
             >
               <div className="space-y-2 min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-base font-bold text-slate-800 leading-tight truncate">
+                  <h3 className="text-base font-bold text-slate-800 leading-tight break-words min-w-0">
                     {job.titulo}
                   </h3>
                   <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusColor(job.status)}`}>
@@ -345,7 +345,7 @@ export default function EmpresaDashboard() {
               <button
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page === 1}
-                className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-55 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors tap-target"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -355,7 +355,7 @@ export default function EmpresaDashboard() {
               <button
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page === lastPage}
-                className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-55 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors tap-target"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

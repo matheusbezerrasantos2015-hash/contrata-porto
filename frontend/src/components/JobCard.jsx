@@ -87,7 +87,7 @@ export default function JobCard({ job, showStatus = false, showActions = false, 
             <button
               onClick={handleFavoriteClick}
               className={clsx(
-                'p-1.5 rounded-lg transition-colors hover:bg-surface-50',
+                'p-2.5 rounded-lg transition-colors hover:bg-surface-50 tap-target',
                 favorited
                   ? 'text-accent-500 hover:text-accent-600'
                   : 'text-slate-300 hover:text-accent-400'

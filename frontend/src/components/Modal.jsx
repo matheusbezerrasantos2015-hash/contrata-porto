@@ -5,12 +5,6 @@ import clsx from 'clsx'
 
 /**
  * Modal — janela modal acessível com portal e trap de foco.
- *
- * @prop {boolean} isOpen
- * @prop {() => void} onClose
- * @prop {string} title
- * @prop {'sm'|'md'|'lg'|'xl'} size
- * @prop {boolean} closeOnOverlay - fecha ao clicar fora (padrão true)
  */
 export default function Modal({
   isOpen,
@@ -21,7 +15,6 @@ export default function Modal({
   closeOnOverlay = true,
   className,
 }) {
-  // ─── Fechar com ESC ────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -29,7 +22,6 @@ export default function Modal({
     return () => window.removeEventListener('keydown', handler)
   }, [isOpen, onClose])
 
-  // ─── Lock scroll do body ───────────────────────────────────────────────────
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -50,35 +42,34 @@ export default function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto animate-fade-in"
       aria-modal="true"
       role="dialog"
       aria-labelledby="modal-title"
     >
-      {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={closeOnOverlay ? onClose : undefined}
         aria-hidden="true"
       />
 
-      {/* Painel */}
       <div
         className={clsx(
-          'relative w-full bg-white rounded-2xl shadow-modal z-10 animate-slide-up',
+          'relative w-full bg-white shadow-modal z-10 animate-slide-up flex flex-col',
+          'max-h-[100dvh] sm:max-h-[calc(100dvh-2rem)]',
+          'rounded-t-2xl sm:rounded-2xl',
           maxW,
           className
         )}
       >
-        {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-surface-200">
-            <h2 id="modal-title" className="text-lg font-semibold text-primary-600">
+          <div className="flex items-center justify-between px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-surface-200 flex-shrink-0">
+            <h2 id="modal-title" className="text-base sm:text-lg font-semibold text-primary-600 pr-4">
               {title}
             </h2>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-surface-100 transition-colors"
+              className="tap-target p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-surface-100 transition-colors flex-shrink-0"
               aria-label="Fechar modal"
             >
               <X className="w-5 h-5" />
@@ -86,8 +77,12 @@ export default function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className={clsx('px-6 py-5', !title && 'pt-6')}>{children}</div>
+        <div className={clsx(
+          'px-4 sm:px-6 py-4 sm:py-5 overflow-y-auto flex-1',
+          !title && 'pt-6'
+        )}>
+          {children}
+        </div>
       </div>
     </div>,
     document.body

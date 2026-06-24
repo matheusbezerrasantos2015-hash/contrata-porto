@@ -47,7 +47,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 text-white py-20 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950 text-white py-12 sm:py-20 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 rounded-full bg-accent-500 blur-3xl" />
           <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-primary-400 blur-3xl" />
@@ -84,7 +84,7 @@ export default function Home() {
               <div className="flex items-center px-3 gap-2 border-t md:border-t-0 md:border-l border-surface-200 py-2 md:py-0">
                 <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
                 <select
-                  className="py-2.5 text-sm text-slate-700 bg-transparent focus:outline-none pr-8 cursor-pointer"
+                  className="py-2.5 text-sm text-slate-700 bg-transparent focus:outline-none pr-8 cursor-pointer w-full min-w-0"
                   value={searchCidade}
                   onChange={(e) => setSearchCidade(e.target.value)}
                 >
@@ -120,7 +120,7 @@ export default function Home() {
           {loading ? (
             <Spinner size="lg" />
           ) : featuredJobs.length === 0 ? (
-            <div className="card p-12 text-center bg-white max-w-xl mx-auto">
+            <div className="card p-6 sm:p-12 text-center bg-white max-w-xl mx-auto">
               <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-600 font-medium">Nenhuma vaga encontrada no momento.</p>
               <p className="text-slate-400 text-sm mt-1">Que tal cadastrar sua empresa e publicar a primeira vaga?</p>
@@ -129,7 +129,7 @@ export default function Home() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredJobs.map((job) => (
                 <JobCard key={job.id} job={job} />
               ))}
@@ -143,7 +143,7 @@ export default function Home() {
         <div className="page-wrapper">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-primary-600 leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-primary-600 leading-tight">
                 Por que escolher o ContrataPorto?
               </h2>
               <p className="text-slate-600 mt-4 leading-relaxed">
@@ -166,7 +166,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-tr from-primary-50 to-primary-100/50 p-8 rounded-2xl border border-primary-100 flex flex-col justify-between h-full gap-8">
+            <div className="bg-gradient-to-tr from-primary-50 to-primary-100/50 p-6 sm:p-8 rounded-2xl border border-primary-100 flex flex-col justify-between h-full gap-8">
               <div>
                 <h3 className="text-xl font-bold text-primary-700">Sua empresa busca novos talentos?</h3>
                 <p className="text-slate-600 text-sm mt-2 leading-relaxed">

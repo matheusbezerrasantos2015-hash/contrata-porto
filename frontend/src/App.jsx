@@ -8,12 +8,12 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen overflow-x-hidden">
           {/* Header Global */}
           <Header />
 
           {/* Conteúdo Principal Dinâmico */}
-          <main className="flex-1 bg-surface-50">
+          <main className="flex-1 bg-surface-50 overflow-x-hidden">
             <AppRoutes />
           </main>
 

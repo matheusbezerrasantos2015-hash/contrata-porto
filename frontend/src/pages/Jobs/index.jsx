@@ -1,13 +1,34 @@
 import { useJobs } from '@/hooks/useJobs'
 import { useSearchParams } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Search, MapPin, Filter, ChevronLeft, ChevronRight, SlidersHorizontal, X } from 'lucide-react'
 import JobCard from '@/components/JobCard'
 import Input from '@/components/Input'
 import Select from '@/components/Select'
 import Button from '@/components/Button'
+import EmptyState from '@/components/EmptyState'
 import useDocumentTitle from '@/hooks/useDocumentTitle'
+
+function filtersFromParams(searchParams) {
+  return {
+    q: searchParams.get('q') ?? '',
+    area: searchParams.get('area') ?? '',
+    nivel: searchParams.get('nivel') ?? '',
+    tipo: searchParams.get('tipo') ?? '',
+    modalidade: searchParams.get('modalidade') ?? '',
+    cidade: searchParams.get('cidade') ?? '',
+    salario_min: searchParams.get('salario_min') ?? '',
+  }
+}
+
+function cleanFilters(values) {
+  const cleaned = {}
+  Object.entries(values).forEach(([k, v]) => {
+    if (v) cleaned[k] = v
+  })
+  return cleaned
+}
 
 const AREAS = [
   'Tecnologia da Informação',
@@ -51,23 +72,15 @@ export default function Jobs() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-  // Valores iniciais dos filtros extraídos da URL
-  const initialValues = {
-    q: searchParams.get('q') ?? '',
-    area: searchParams.get('area') ?? '',
-    nivel: searchParams.get('nivel') ?? '',
-    tipo: searchParams.get('tipo') ?? '',
-    modalidade: searchParams.get('modalidade') ?? '',
-    cidade: searchParams.get('cidade') ?? '',
-    salario_min: searchParams.get('salario_min') ?? '',
-  }
+  const urlFilters = useMemo(() => filtersFromParams(searchParams), [searchParams])
+  const activeFilters = useMemo(() => cleanFilters(urlFilters), [urlFilters])
 
-  const { register, watch, reset, setValue } = useForm({
-    defaultValues: initialValues,
+  const { register, watch } = useForm({
+    values: urlFilters,
   })
 
-  // Assiste a todos os campos para fazer filtros reativos
   const formValues = watch()
+  const formKey = useMemo(() => JSON.stringify(cleanFilters(formValues)), [formValues])
 
   const {
     jobs,
@@ -76,36 +89,33 @@ export default function Jobs() {
     lastPage,
     loading,
     setPage,
-    setFilters,
-  } = useJobs(initialValues)
+  } = useJobs(activeFilters)
 
-  // Efeito reativo: quando qualquer valor de input do formulário mudar, atualizamos a URL e os filtros do hook
+  // Atualiza URL quando o usuário altera filtros (debounce)
   useEffect(() => {
-    const cleaned = {}
-    Object.entries(formValues).forEach(([k, v]) => {
-      if (v) cleaned[k] = v
-    })
-    
-    // Atualiza a URL sem causar full page reload
-    setSearchParams(cleaned, { replace: true })
-    setFilters(cleaned)
-  }, [formValues, setSearchParams, setFilters])
+    const timer = setTimeout(() => {
+      const cleaned = cleanFilters(formValues)
+      const next = new URLSearchParams(cleaned).toString()
+      const current = searchParams.toString()
+      if (next !== current) {
+        setSearchParams(cleaned, { replace: true })
+      }
+    }, 300)
 
-  // Sincroniza o form se a URL for alterada por links externos (ex: clique no Header)
+    return () => clearTimeout(timer)
+  }, [formKey, formValues, searchParams, setSearchParams])
+
+  // Bloqueia scroll do body quando drawer de filtros mobile está aberto
   useEffect(() => {
-    reset({
-      q: searchParams.get('q') ?? '',
-      area: searchParams.get('area') ?? '',
-      nivel: searchParams.get('nivel') ?? '',
-      tipo: searchParams.get('tipo') ?? '',
-      modalidade: searchParams.get('modalidade') ?? '',
-      cidade: searchParams.get('cidade') ?? '',
-      salario_min: searchParams.get('salario_min') ?? '',
-    })
-  }, [searchParams, reset])
+    if (mobileFiltersOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [mobileFiltersOpen])
 
   const clearFilters = () => {
-    reset({ q: '', area: '', nivel: '', tipo: '', modalidade: '', salario_min: '', cidade: '' })
     setSearchParams({})
   }
 
@@ -158,9 +168,9 @@ export default function Jobs() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 items-start">
         {/* Sidebar Filtros (Desktop) */}
-        <aside className="hidden md:block card p-6 sticky top-20 bg-white">
+        <aside className="hidden lg:block card p-6 sticky top-20 bg-white">
           <div className="flex items-center justify-between pb-4 border-b border-surface-200 mb-5">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <Filter className="w-4 h-4 text-primary-500" />
@@ -194,7 +204,7 @@ export default function Jobs() {
         </aside>
 
         {/* Lista de Vagas */}
-        <section className="md:col-span-3 flex flex-col gap-6">
+        <section className="lg:col-span-3 flex flex-col gap-6">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {[1, 2, 3, 4].map((n) => (
@@ -234,7 +244,7 @@ export default function Jobs() {
                   <button
                     onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
-                    className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-55 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors tap-target"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -244,7 +254,7 @@ export default function Jobs() {
                   <button
                     onClick={() => handlePageChange(page + 1)}
                     disabled={page === lastPage}
-                    className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-55 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-2.5 rounded-xl border border-surface-200 bg-white text-slate-600 hover:bg-surface-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors tap-target"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -262,7 +272,7 @@ export default function Jobs() {
           <div className="relative w-80 max-w-full bg-white h-full shadow-modal flex flex-col z-10 animate-slide-up overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-surface-200">
               <h2 className="text-base font-bold text-slate-800">Filtros</h2>
-              <button onClick={() => setMobileFiltersOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-slate-600">
+              <button onClick={() => setMobileFiltersOpen(false)} className="tap-target p-2 rounded-lg text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>

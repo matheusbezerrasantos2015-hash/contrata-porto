@@ -149,8 +149,8 @@ export default function JobDetail() {
                 <div className="w-16 h-16 rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-center flex-shrink-0">
                   <Building2 className="w-8 h-8 text-primary-400" />
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-primary-600 leading-tight">{job.titulo}</h1>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-xl sm:text-2xl font-bold text-primary-600 leading-tight break-words">{job.titulo}</h1>
                   <p className="text-slate-600 font-medium text-sm mt-1">
                     {job.empresa?.nome_fantasia ?? 'Empresa Confidencial'}
                   </p>
@@ -180,32 +180,32 @@ export default function JobDetail() {
 
             {/* Chips rápidos */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
-              <div className="flex items-center gap-2.5">
-                <MapPin className="w-5 h-5 text-slate-400" />
-                <div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <MapPin className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-slate-400 font-medium uppercase">Cidade</p>
                   <p className="text-sm font-semibold text-slate-700 truncate">
                     {job.modalidade === 'remoto' ? 'Remoto' : (job.cidade ?? 'Porto Ferreira, SP')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Clock className="w-5 h-5 text-slate-400" />
-                <div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Clock className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-slate-400 font-medium uppercase">Contrato</p>
                   <p className="text-sm font-semibold text-slate-700 truncate">{formatTipoContrato(job.tipo)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Briefcase className="w-5 h-5 text-slate-400" />
-                <div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Briefcase className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-slate-400 font-medium uppercase">Modalidade</p>
                   <p className="text-sm font-semibold text-slate-700 truncate">{formatModalidade(job.modalidade)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Banknote className="w-5 h-5 text-slate-400" />
-                <div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Banknote className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                <div className="min-w-0">
                   <p className="text-xs text-slate-400 font-medium uppercase">Salário</p>
                   <p className="text-sm font-semibold text-slate-700 truncate">{salaryLabel}</p>
                 </div>
@@ -216,7 +216,7 @@ export default function JobDetail() {
           <div className="card p-6 sm:p-8 bg-white space-y-6">
             <div>
               <h2 className="text-lg font-bold text-primary-600 mb-3">Descrição da Vaga</h2>
-              <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+              <div className="text-slate-600 text-sm leading-relaxed text-content">
                 {job.descricao}
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function JobDetail() {
             {job.requisitos && (
               <div className="border-t border-surface-200 pt-6">
                 <h2 className="text-lg font-bold text-primary-600 mb-3">Requisitos</h2>
-                <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+                <div className="text-slate-600 text-sm leading-relaxed text-content">
                   {job.requisitos}
                 </div>
               </div>
@@ -233,7 +233,7 @@ export default function JobDetail() {
             {job.diferenciais && (
               <div className="border-t border-surface-200 pt-6">
                 <h2 className="text-lg font-bold text-primary-600 mb-3">Diferenciais</h2>
-                <div className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+                <div className="text-slate-600 text-sm leading-relaxed text-content">
                   {job.diferenciais}
                 </div>
               </div>
@@ -297,18 +297,18 @@ export default function JobDetail() {
           <div className="card p-6 bg-white space-y-3">
             <h3 className="font-bold text-slate-800 text-base mb-1">Informações Adicionais</h3>
 
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-400 font-medium flex items-center gap-1.5">
+            <div className="flex justify-between items-center gap-2 text-xs">
+              <span className="text-slate-400 font-medium flex items-center gap-1.5 flex-shrink-0">
                 <Calendar className="w-4 h-4" /> Publicada em
               </span>
-              <span className="font-semibold text-slate-700">{formatDate(job.created_at)}</span>
+              <span className="font-semibold text-slate-700 text-right">{formatDate(job.created_at)}</span>
             </div>
             {job.area && (
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400 font-medium flex items-center gap-1.5">
+              <div className="flex justify-between items-center gap-2 text-xs">
+                <span className="text-slate-400 font-medium flex items-center gap-1.5 flex-shrink-0">
                   <GraduationCap className="w-4 h-4" /> Área
                 </span>
-                <span className="font-semibold text-slate-700">{job.area}</span>
+                <span className="font-semibold text-slate-700 text-right truncate">{job.area}</span>
               </div>
             )}
           </div>

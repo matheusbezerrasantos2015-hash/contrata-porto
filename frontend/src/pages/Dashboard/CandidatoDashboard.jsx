@@ -79,7 +79,7 @@ export default function CandidatoDashboard() {
                   <Building2 className="w-6 h-6 text-primary-400" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold text-slate-800 truncate leading-snug">
+                  <h3 className="text-base font-bold text-slate-800 break-words leading-snug">
                     <Link to={`/vagas/${app.vaga?.id ?? app.vaga_id}`} className="hover:underline text-slate-800">
                       {app.vaga?.titulo ?? 'Vaga Indisponível'}
                     </Link>

@@ -50,9 +50,9 @@ export default function Cadastro() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-card border border-surface-200 p-8">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-card border border-surface-200 p-6 sm:p-8">
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-primary-600 font-sans">Crie sua conta</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-primary-600 font-sans">Crie sua conta</h2>
           <p className="text-slate-500 text-sm mt-2">
             Escolha o tipo de conta e preencha os dados abaixo.
           </p>

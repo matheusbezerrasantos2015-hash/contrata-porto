@@ -161,7 +161,7 @@ export default function CandidatoSettings() {
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
-                className="absolute -bottom-1 -right-1 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-1.5 shadow transition-colors"
+                className="absolute -bottom-1 -right-1 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-2 shadow transition-colors tap-target"
                 title="Alterar foto"
               >
                 <Camera className="w-3.5 h-3.5" />

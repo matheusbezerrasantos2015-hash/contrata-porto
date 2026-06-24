@@ -51,7 +51,7 @@ export default function Footer() {
             <a
               href="mailto:contato@contrataporto.com.br"
               aria-label="E-mail"
-              className="p-2 rounded-lg text-primary-400 hover:text-white hover:bg-primary-800 transition-colors"
+              className="p-2.5 rounded-lg text-primary-400 hover:text-white hover:bg-primary-800 transition-colors tap-target"
             >
               <Mail className="w-4 h-4" />
             </a>
@@ -60,7 +60,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn"
-              className="p-2 rounded-lg text-primary-400 hover:text-white hover:bg-primary-800 transition-colors"
+              className="p-2.5 rounded-lg text-primary-400 hover:text-white hover:bg-primary-800 transition-colors tap-target"
             >
               <Linkedin className="w-4 h-4" />
             </a>

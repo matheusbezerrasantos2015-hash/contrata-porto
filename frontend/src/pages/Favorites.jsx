@@ -16,7 +16,7 @@ export default function Favorites() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((n) => (
             <div key={n} className="card p-6 h-56 animate-pulse bg-white flex flex-col gap-4">
               <div className="flex items-center gap-3">
@@ -31,7 +31,7 @@ export default function Favorites() {
           ))}
         </div>
       ) : favorites.length === 0 ? (
-        <div className="card p-12 text-center bg-white max-w-xl mx-auto w-full">
+        <div className="card p-6 sm:p-12 text-center bg-white max-w-xl mx-auto w-full">
           <Heart className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <p className="text-slate-600 font-semibold">Nenhuma vaga favorita.</p>
           <p className="text-slate-400 text-sm mt-1">Explore a busca de vagas e clique no ícone de coração para salvar aqui.</p>

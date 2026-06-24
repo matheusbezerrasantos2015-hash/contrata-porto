@@ -136,7 +136,7 @@ export default function JobApplicationsList() {
           <div className="flex items-start sm:items-center justify-between gap-4 flex-wrap">
             <div>
               <span className="text-xs font-bold text-primary-500 uppercase tracking-wider">Candidaturas da Vaga</span>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 mt-1">{job.titulo}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 mt-1 break-words">{job.titulo}</h1>
               <p className="text-xs text-slate-400 mt-1">
                 Publicada em {formatDate(job.created_at)} | Status: {formatJobStatus(job.status)}
               </p>
@@ -169,7 +169,7 @@ export default function JobApplicationsList() {
           ))}
         </div>
       ) : applications.length === 0 ? (
-        <div className="card p-12 text-center bg-white max-w-xl mx-auto w-full">
+        <div className="card p-6 sm:p-12 text-center bg-white max-w-xl mx-auto w-full">
           <User className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <p className="text-slate-600 font-semibold">Nenhuma candidatura recebida ainda.</p>
           <p className="text-slate-400 text-sm mt-1">Divulgue o link da vaga pública para atrair mais candidatos.</p>
@@ -180,9 +180,9 @@ export default function JobApplicationsList() {
             <article key={app.id} className="card p-6 bg-white flex flex-col gap-5 border border-surface-200">
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 {/* Dados do Candidato */}
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-lg font-bold text-slate-800 leading-snug">
+                    <h3 className="text-lg font-bold text-slate-800 leading-snug break-words">
                       {app.candidato?.usuario?.nome ?? 'Candidato'}
                     </h3>
                     <Badge variant={applicationStatusVariant(app.status)}>
@@ -191,8 +191,8 @@ export default function JobApplicationsList() {
                   </div>
 
                   <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-3.5 h-3.5" />
+                    <span className="flex items-center gap-1 min-w-0 break-all">
+                      <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                       {app.candidato?.usuario?.email ?? '—'}
                     </span>
                     {app.telefone && (
@@ -209,13 +209,13 @@ export default function JobApplicationsList() {
                 </div>
 
                 {/* Status Picker (Pipeline) */}
-                <div className="flex items-center gap-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase hidden lg:block">Alterar Status:</label>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                  <label className="text-xs font-semibold text-slate-400 uppercase lg:block hidden">Alterar Status:</label>
                   <select
                     value={app.status}
                     disabled={updatingId === app.id}
                     onChange={(e) => handleUpdateStatus(app.id, e.target.value)}
-                    className="input py-1.5 px-3 text-xs w-auto font-semibold bg-surface-50 border-surface-200 text-slate-700"
+                    className="input py-2 px-3 text-xs w-full sm:w-auto min-h-[44px] font-semibold bg-surface-50 border-surface-200 text-slate-700"
                   >
                     <option value="pendente">Pendente</option>
                     <option value="em_analise">Em Análise</option>
@@ -227,7 +227,7 @@ export default function JobApplicationsList() {
 
               {/* Mensagem de Apresentação */}
               {app.mensagem && (
-                <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 text-sm text-slate-600 italic whitespace-pre-line leading-relaxed">
+                <div className="bg-surface-50 p-4 rounded-xl border border-surface-200 text-sm text-slate-600 italic text-content leading-relaxed">
                   "{app.mensagem}"
                 </div>
               )}
