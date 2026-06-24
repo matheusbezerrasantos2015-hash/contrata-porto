@@ -31,16 +31,11 @@ export default function Header() {
       <div className="page-wrapper">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 no-underline group">
+          <Link to="/" className="flex items-center no-underline group">
             <img
               src="/favicon.png"
-              alt=""
-              className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-surface-200"
-            />
-            <img
-              src="/logo.png"
               alt="ContrataPorto"
-              className="h-9 w-auto object-contain hidden sm:block"
+              className="w-9 h-9 rounded-full object-cover flex-shrink-0 ring-1 ring-surface-200"
             />
           </Link>
 
