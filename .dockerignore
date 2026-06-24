@@ -18,7 +18,6 @@ npm-debug.log
 # Legacy/Unneeded directories for API production build
 backend_legacy/
 database_legacy/
-frontend/
 uploads/
 tests/
 
