@@ -9,7 +9,6 @@
 
 # PHP / Composer
 vendor/
-composer.lock
 
 # Node / JS
 node_modules/
