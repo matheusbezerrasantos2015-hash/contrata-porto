@@ -26,7 +26,7 @@
                             <p>Processos seletivos têm seu tempo, mas fique tranquilo(a) — você receberá uma atualização assim que houver novidades.</p>
                             
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="{{ $baseUrl }}/frontend/pages/candidate-dashboard.html" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Ver minha candidatura →</a>
+                                <a href="{{ $baseUrl }}/dashboard/candidato" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Ver minha candidatura →</a>
                             </div>
                             
                             <p>Enquanto isso, continue explorando outras vagas no ContrataPorto. A gente acredita que quanto mais você se movimenta, mais oportunidades aparecem. 💪</p>

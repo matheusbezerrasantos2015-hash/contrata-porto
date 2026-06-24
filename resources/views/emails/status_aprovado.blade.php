@@ -26,7 +26,7 @@
                             <p>Isso é incrível — parabéns! Agora é com vocês dois. A empresa deve entrar em contato em breve pelos dados que você informou no cadastro.</p>
                             
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="{{ $baseUrl }}/frontend/pages/candidate-dashboard.html" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Ver minha candidatura →</a>
+                                <a href="{{ $baseUrl }}/dashboard/candidato" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Ver minha candidatura →</a>
                             </div>
                             
                             <p>Boa sorte nessa nova etapa! A gente torce muito por você. 💙</p>

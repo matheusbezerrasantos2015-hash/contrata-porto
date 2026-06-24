@@ -1,46 +1,68 @@
 <?php
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$file = __DIR__ . $uri;
 
-// Segurança: bloquear execução de PHP em uploads
-if (strpos($uri, '/uploads/') !== false && 
-    pathinfo($uri, PATHINFO_EXTENSION) === 'php') {
-    http_response_code(403);
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Forbidden']);
+/**
+ * Router para o servidor embutido do PHP (php -S).
+ * Redireciona rotas legadas e encaminha API + SPA React.
+ */
+
+$uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+
+// 1. API Laravel
+if (str_starts_with($uri, '/api')) {
+    require __DIR__ . '/public/index.php';
+    return true;
+}
+
+// 2. Assets do Laravel (emails)
+if (str_starts_with($uri, '/frontend/assets/')) {
+    $file = __DIR__ . '/public' . $uri;
+    if (is_file($file)) {
+        return false;
+    }
+}
+
+// 3. Redirecionamentos do frontend legado → SPA React
+$legacyRedirects = [
+    '/frontend/pages/index.html'             => '/',
+    '/frontend/pages/jobs.html'              => '/vagas',
+    '/frontend/pages/job.html'               => '/vagas',
+    '/frontend/pages/login.html'             => '/login',
+    '/frontend/pages/cadastro.html'          => '/cadastro',
+    '/frontend/pages/favorites.html'         => '/favoritos',
+    '/frontend/pages/candidate-dashboard.html' => '/dashboard/candidato',
+    '/frontend/pages/company-dashboard.html'   => '/dashboard/empresa',
+    '/frontend/pages/candidate-settings.html'  => '/settings/candidato',
+    '/frontend/pages/company-settings.html'    => '/settings/empresa',
+    '/frontend/pages/forgot-password.html'     => '/esqueci-senha',
+    '/frontend/pages/reset-password.html'      => '/reset-senha',
+    '/frontend/pages/verify-email.html'        => '/verificar-email',
+];
+
+if (isset($legacyRedirects[$uri])) {
+    header('Location: ' . $legacyRedirects[$uri], true, 301);
     exit;
 }
 
-// 1. Se o arquivo físico existe (css, js, imagens), serve ele direto
-if ($uri !== '/' && file_exists($file)) {
+if (str_starts_with($uri, '/frontend/pages/')) {
+    header('Location: /', true, 301);
+    exit;
+}
+
+// 4. SPA React (build em public/app/)
+$spaRoot = __DIR__ . '/public/app';
+$spaFile = $spaRoot . $uri;
+
+if ($uri !== '/' && is_file($spaFile)) {
     return false;
 }
 
-// 2. Se a URL começa com /api, manda para o index.php do backend
-if (strpos($uri, '/api') === 0) {
-    // Ajusta o SCRIPT_NAME para o roteador do backend entender
-    $_SERVER['SCRIPT_NAME'] = '/backend/public/index.php';
-    require __DIR__ . '/backend/public/index.php';
-    return;
+$indexFile = $spaRoot . '/index.html';
+if (is_file($indexFile)) {
+    header('Content-Type: text/html; charset=UTF-8');
+    readfile($indexFile);
+    return true;
 }
 
-// 3. Se for a raiz, serve o index.html do frontend
-if ($uri === '/' || $uri === '/index.html') {
-    require __DIR__ . '/frontend/pages/index.html';
-    return;
-}
-
-// 4. Se for qualquer outra página do frontend (ex: /jobs.html)
-$frontendFile = __DIR__ . '/frontend/pages' . $uri;
-if (file_exists($frontendFile)) {
-    require $frontendFile;
-    return;
-}
-
-// 5. Caso contrário, serve o 404 do frontend
-if (file_exists(__DIR__ . '/frontend/pages/404.html')) {
-    require __DIR__ . '/frontend/pages/404.html';
-    return;
-}
-
-return false;
+http_response_code(404);
+echo '404 Not Found';
+return true;

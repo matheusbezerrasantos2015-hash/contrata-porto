@@ -26,7 +26,7 @@
                             <p>Não desanima! Cada processo seletivo é uma experiência que te aproxima da vaga certa. O ContrataPorto tem várias outras oportunidades esperando por você.</p>
                             
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="{{ $baseUrl }}/frontend/pages/jobs.html" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Ver outras vagas →</a>
+                                <a href="{{ $baseUrl }}/vagas" style="background-color: #4f46e5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Ver outras vagas →</a>
                             </div>
                             
                             <p>Continue explorando — sua vaga ideal pode estar logo ali. 🙂</p>
