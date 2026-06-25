@@ -1,3 +1,7 @@
+// Este arquivo é um stub do Laravel.
+// O frontend React real está em /frontend/vite.config.js
+// Este arquivo pode ser ignorado.
+
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 
