@@ -17,10 +17,10 @@ class CheckUserType
     {
         $user = $request->user();
 
-        if (!$user || strtoupper((string)$user->tipo) !== strtoupper($type)) {
+        if (!$user || strtoupper((string) $user->tipo) !== strtoupper($type)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Forbidden'
+                'message' => 'Acesso não autorizado.',
             ], 403);
         }
 

@@ -2,31 +2,24 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'users';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    /** @var array<string, string>|null */
+    protected static ?array $legacyColumnMap = null;
+
     protected $fillable = [
         'nome',
         'email',
@@ -41,13 +34,14 @@ class User extends Authenticatable
         'cidade',
         'estado',
         'curriculo',
+        'empresa_id',
+        'linkedin',
+        'portfolio',
+        'area',
+        'nivel_experiencia',
+        'sobre',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -55,29 +49,87 @@ class User extends Authenticatable
         'reset_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'email_verified_at'      => 'datetime',
             'reset_token_expires_at' => 'datetime',
+            'deleted_at'             => 'datetime',
             'password'               => 'hashed',
         ];
     }
 
-    // ─────────────────────────────────────────
-    // Accessors
-    // ─────────────────────────────────────────
+    /**
+     * Mapeia nomes lógicos (Laravel) para colunas físicas (legado ou novo schema).
+     */
+    protected static function physicalColumn(string $logical): string
+    {
+        if (static::$legacyColumnMap === null) {
+            $table = (new static)->getTable();
+
+            static::$legacyColumnMap = [
+                'password' => Schema::hasColumn($table, 'password')
+                    ? 'password'
+                    : (Schema::hasColumn($table, 'senha') ? 'senha' : 'password'),
+                'tipo' => Schema::hasColumn($table, 'tipo')
+                    ? 'tipo'
+                    : (Schema::hasColumn($table, 'role') ? 'role' : 'tipo'),
+                'avatar' => Schema::hasColumn($table, 'avatar')
+                    ? 'avatar'
+                    : (Schema::hasColumn($table, 'avatar_path') ? 'avatar_path' : 'avatar'),
+            ];
+        }
+
+        return static::$legacyColumnMap[$logical] ?? $logical;
+    }
+
+    public function getAttribute($key)
+    {
+        if ($key === 'password') {
+            $physical = static::physicalColumn('password');
+
+            return $this->attributes[$physical] ?? null;
+        }
+
+        if ($key === 'tipo') {
+            $physical = static::physicalColumn('tipo');
+
+            return isset($this->attributes[$physical])
+                ? strtoupper((string) $this->attributes[$physical])
+                : null;
+        }
+
+        if ($key === 'avatar') {
+            $physical = static::physicalColumn('avatar');
+
+            return $this->attributes[$physical] ?? null;
+        }
+
+        return parent::getAttribute($key);
+    }
+
+    public function setAttribute($key, $value)
+    {
+        if (in_array($key, ['password', 'tipo', 'avatar'], true)) {
+            $physical = static::physicalColumn($key);
+            if ($key === 'tipo' && $value !== null) {
+                $value = strtoupper((string) $value);
+            }
+
+            return parent::setAttribute($physical, $value);
+        }
+
+        return parent::setAttribute($key, $value);
+    }
 
     /**
-     * Retorna a URL completa do avatar Cloudinary.
-     * Se o campo já contiver uma URL completa (https://), retorna como está.
-     * Caso contrário, monta a URL base do Cloudinary.
+     * Senha para autenticação (compatível com coluna legada `senha`).
      */
+    public function getAuthPassword(): string
+    {
+        return (string) ($this->password ?? '');
+    }
+
     public function getAvatarUrlAttribute(): ?string
     {
         if (! $this->avatar) {
@@ -93,9 +145,6 @@ class User extends Authenticatable
         return "https://res.cloudinary.com/{$cloudName}/image/upload/{$this->avatar}";
     }
 
-    /**
-     * Retorna a URL completa do currículo (PDF) no Cloudinary.
-     */
     public function getCurriculoUrlAttribute(): ?string
     {
         if (! $this->curriculo) {
@@ -111,57 +160,39 @@ class User extends Authenticatable
         return "https://res.cloudinary.com/{$cloudName}/raw/upload/{$this->curriculo}";
     }
 
-    // ─────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────
-
-    /**
-     * Verifica se o usuário é candidato.
-     */
     public function isCandidato(): bool
     {
         return $this->tipo === 'CANDIDATO';
     }
 
-    /**
-     * Verifica se o usuário é empresa.
-     */
     public function isEmpresa(): bool
     {
         return $this->tipo === 'EMPRESA';
     }
 
-    /**
-     * Verifica se o email foi verificado.
-     */
     public function hasVerifiedEmail(): bool
     {
-        return ! is_null($this->email_verified_at);
+        if (! is_null($this->email_verified_at)) {
+            return true;
+        }
+
+        if (array_key_exists('email_verified', $this->attributes)) {
+            return (bool) $this->attributes['email_verified'];
+        }
+
+        return false;
     }
 
-    // ─────────────────────────────────────────
-    // Relationships
-    // ─────────────────────────────────────────
-
-    /**
-     * Empresa vinculada ao usuário (quando tipo = 'EMPRESA').
-     */
     public function company(): HasOne
     {
         return $this->hasOne(Company::class);
     }
 
-    /**
-     * Candidaturas do usuário (quando tipo = 'CANDIDATO').
-     */
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
     }
 
-    /**
-     * Vagas favoritas do usuário.
-     */
     public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);

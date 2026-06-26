@@ -46,13 +46,14 @@ class ContrataPortoApiTest extends TestCase
         $this->assertNotNull($verification);
         $code = $verification->code;
 
-        // 2. Try to login before verifying email (should fail with 403)
+        // 2. Try to login before verifying email (should fail with 401)
         $loginFail = $this->postJson('/api/auth/login', [
             'email' => 'candidato@test.com',
             'senha' => 'password123',
         ]);
-        $loginFail->assertStatus(403)
+        $loginFail->assertStatus(401)
                   ->assertJsonPath('success', false)
+                  ->assertJsonPath('code', 'EMAIL_NOT_VERIFIED')
                   ->assertJsonPath('data.requires_verification', true);
 
         // 3. Verify email

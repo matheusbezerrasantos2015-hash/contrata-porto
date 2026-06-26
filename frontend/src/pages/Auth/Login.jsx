@@ -37,7 +37,7 @@ export default function Login() {
       if (from) {
         navigate(from, { replace: true })
       } else {
-        navigate(user.role === 'EMPRESA' ? '/dashboard/empresa' : '/dashboard/candidato', { replace: true })
+        navigate(user.tipo === 'EMPRESA' || user.role === 'EMPRESA' ? '/dashboard/empresa' : '/dashboard/candidato', { replace: true })
       }
     } catch (err) {
       setErrorMsg(err.response?.data?.message ?? 'Credenciais inválidas. Tente novamente.')

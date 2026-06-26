@@ -27,8 +27,9 @@ class UserController extends Controller
             'telefone' => $user->telefone ?? '',
             'cidade'   => $user->cidade ?? '',
             'estado'   => $user->estado ?? '',
-            'avatar'   => $user->avatar_url,
             'curriculo'=> $user->curriculo_url,
+            'avatar'   => $user->avatar_url,
+            'tipo'     => $user->tipo,
             'role'     => $user->tipo,
         ];
 

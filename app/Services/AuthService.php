@@ -37,7 +37,7 @@ class AuthService
             $user = User::create([
                 'nome'     => $data['nome'],
                 'email'    => $data['email'],
-                'password' => Hash::make($data['senha']),
+                'password' => $data['senha'],
                 'tipo'     => $role,
                 'cidade'   => $role === 'EMPRESA' ? 'Porto Ferreira' : ($data['cidade'] ?? null),
                 'estado'   => $role === 'EMPRESA' ? 'SP' : ($data['estado'] ?? null),
@@ -87,15 +87,15 @@ class AuthService
         $user = User::where('email', $email)->first();
 
         if (!$user) {
-            throw new Exception("Usuário não encontrado", 404);
+            throw new Exception('Credenciais inválidas.', 401);
         }
 
-        if (!Hash::check($senha, $user->password)) {
-            throw new Exception("Unauthorized", 401);
+        if (!Hash::check($senha, $user->getAuthPassword())) {
+            throw new Exception('Credenciais inválidas.', 401);
         }
 
         if (!$user->hasVerifiedEmail()) {
-            throw new Exception("Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada.", 403);
+            throw new Exception('Confirme seu e-mail antes de entrar.', 401);
         }
 
         // Carrega relacionamento da empresa se for empresa
@@ -111,12 +111,15 @@ class AuthService
 
         return [
             'usuario' => [
-                'id'            => $user->id,
-                'nome'          => $user->nome,
-                'email'         => $user->email,
-                'role'          => $user->tipo, // Mantém em maiúsculas (CANDIDATO/EMPRESA) para o frontend
-                'empresa_id'    => $empresaId,
-                'nome_fantasia' => $nomeFantasia,
+                'id'                => $user->id,
+                'nome'              => $user->nome,
+                'email'             => $user->email,
+                'tipo'              => $user->tipo,
+                'role'              => $user->tipo,
+                'avatar'            => $user->avatar_url,
+                'email_verified_at' => $user->email_verified_at,
+                'empresa_id'        => $empresaId,
+                'nome_fantasia'     => $nomeFantasia,
             ],
             'auth' => [
                 'type'  => 'bearer',
@@ -168,7 +171,7 @@ class AuthService
         }
 
         $user->update([
-            'password'               => Hash::make($novaSenha),
+            'password'               => $novaSenha,
             'reset_token'            => null,
             'reset_token_expires_at' => null,
         ]);
@@ -261,12 +264,15 @@ class AuthService
 
         return [
             'usuario' => [
-                'id'            => $user->id,
-                'nome'          => $user->nome,
-                'email'         => $user->email,
-                'role'          => $user->tipo,
-                'empresa_id'    => $empresaId,
-                'nome_fantasia' => $nomeFantasia,
+                'id'                => $user->id,
+                'nome'              => $user->nome,
+                'email'             => $user->email,
+                'tipo'              => $user->tipo,
+                'role'              => $user->tipo,
+                'avatar'            => $user->avatar_url,
+                'email_verified_at' => $user->email_verified_at,
+                'empresa_id'        => $empresaId,
+                'nome_fantasia'     => $nomeFantasia,
             ],
             'auth' => [
                 'type'  => 'bearer',

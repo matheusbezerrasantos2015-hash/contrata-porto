@@ -86,13 +86,16 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             $code = match (true) {
                 $e->getCode() === 404 => 404,
-                $e->getCode() === 403 => 403,
                 default               => 401,
             };
+
+            $isUnverified = str_contains($e->getMessage(), 'Confirme seu e-mail');
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
-                'data'    => $code === 403 ? ['requires_verification' => true, 'email' => $request->input('email')] : null,
+                'code'    => $isUnverified ? 'EMAIL_NOT_VERIFIED' : null,
+                'data'    => $isUnverified ? ['requires_verification' => true, 'email' => $request->input('email')] : null,
             ], $code);
         }
     }

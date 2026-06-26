@@ -99,7 +99,7 @@ export function AuthProvider({ children }) {
     token,
     loading,
     isAuthenticated: !!user && !!token,
-    userType: user?.role ?? null,
+    userType: user?.tipo ?? user?.role ?? null,
     login,
     logout,
     updateUser,
